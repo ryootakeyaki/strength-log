@@ -35,7 +35,11 @@ node -e "const fs=require('fs');const h=fs.readFileSync('index.html','utf8');con
 `__name` は一覧が壊れても名前ごと復元できるよう、各ユーザーblobに自己記述として持たせている。消さないこと。
 
 ### 埋め込みデータ (SUGANO_BUNDLE)
-`<script id="sugano-bundle">` に、あるユーザー(菅野涼太)のExcelから変換した約4,290セットが埋め込まれている。初回に一度だけ取り込まれる。**この4,290セットを破壊しないこと。** 破壊的変更をする関数（削除・マージ）は、必ず件数を確認してから。
+`<script id="sugano-bundle" src="sugano-bundle.local.js">` が、あるユーザー(菅野涼太)のExcelから変換した約4,290セットを読み込む。初回に一度だけ取り込まれる。**この4,290セットを破壊しないこと。** 破壊的変更をする関数（削除・マージ）は、必ず件数を確認してから。
+
+**このファイルは `.gitignore` されており、Gitリポジトリには含まれない。** 実データは `sugano-bundle.local.js`（リポジトリ直下、ローカルのみ）に `window.SUGANO_BUNDLE={...}` の形で置かれている。理由: 本リポジトリはGitHub Pagesで公開しているため、実在する個人の名前とトレーニング記録をコミットすると誰でも閲覧できてしまう（過去に一度、公開リポジトリへ丸ごとコミットしてしまい、リポジトリを削除して作り直す事故があった）。
+- `index.html` / `strength-log.html` は空の参照タグだけを持つ。`sugano-bundle.local.js` が存在しない環境（GitHub Pages上の公開版や他人の端末）では単にスクリプトが404し、`window.SUGANO_BUNDLE` は `undefined` のまま → 通常の「データなし」の起動になる（既存のフォールバック処理で問題なく動く）。
+- **個人データを含むファイルを絶対にコミットしない。** 新しく個人データ的なものを埋め込む場合も、必ずこの「`.local.js`を`.gitignore`する」パターンに従うこと。
 
 ## コードの地図（すべて index.html 内の1つのIIFE）
 
@@ -67,8 +71,15 @@ cp index.html strength-log.html
 - フォント: 数字・見出しは Oswald、日本語は Noto Sans JP。
 - 「今日」の行は赤 (`--today:#ff6f63`) + 白枠で強調。前回超えのセットは緑 (`--up:#6fca5a`) の下地。
 
+## ホスティング
+
+- GitHubリポジトリ: https://github.com/ryootakeyaki/strength-log （Public）
+- GitHub Pages公開URL: https://ryootakeyaki.github.io/strength-log/
+- pushすると数分でPagesに反映される。`sugano-bundle.local.js` はpushされないので、公開版は常にデータなしの汎用アプリとして動く。
+
 ## やらないこと / 注意
 
 - localStorage を `window.storage` が使える環境で使わない（プレビューで壊れる）。フォールバック時のみ。
 - 破壊的なデータ変更を「確認・テストせずに」行わない。特に4,290セットの埋め込みデータ。
 - 目標体重・ログイン・複数端末同期は未実装。やるならサーバー(Supabase/Firebase)が必要で、別途相談。
+- **`sugano-bundle.local.js`（個人データ）を絶対にGitにコミット/pushしない。** `.gitignore` を消さないこと。
