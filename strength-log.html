@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>筋トレログ — STRENGTH LOG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14161a;
+    --surface:#1d2025;
+    --surface-2:#262a30;
+    --well:#0f1114;
+    --line:#33383f;
+    --line-soft:#2a2e34;
+    --text:#e8e6e1;
+    --muted:#8a8f98;
+    --faint:#5b616b;
+    --accent:#f6a609;
+    --accent-dim:#b87c10;
+    --danger:#e2564d;
+    --up:#6fca5a;
+    --today:#ff6f63;
+    --pr:#f6a609;
+    --radius:14px;
+    --tap:52px;
+    --nav-h:64px;
+    --maxw:540px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Noto Sans JP",system-ui,-apple-system,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior-y:none;
+  }
+  .num{font-family:"Oswald",system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:.01em;}
+
+  .app{
+    max-width:var(--maxw);
+    margin:0 auto;
+    min-height:100%;
+    padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom));
+    position:relative;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 20px 14px;
+    border-bottom:1px solid var(--line-soft);
+    position:sticky;top:0;z-index:20;
+    background:linear-gradient(180deg,var(--bg) 82%,rgba(20,22,26,0));
+  }
+  .brand{display:flex;align-items:center;gap:11px;}
+  .brand-mark{
+    width:30px;height:30px;border-radius:6px;
+    background:var(--accent);position:relative;flex:none;
+    box-shadow:0 0 0 1px rgba(0,0,0,.3) inset;
+  }
+  .brand-mark::before{
+    content:"";position:absolute;inset:0;margin:auto;
+    width:15px;height:6px;border-radius:2px;background:var(--bg);
+    box-shadow:-10px 0 0 -1px var(--bg),10px 0 0 -1px var(--bg);
+  }
+  .brand h1{font-size:16px;font-weight:700;letter-spacing:.02em;line-height:1.1;}
+  .brand .sub{
+    font-family:"Oswald",sans-serif;font-size:10px;letter-spacing:.28em;
+    color:var(--faint);font-weight:500;text-transform:uppercase;
+  }
+  .user-pill{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:22px;padding:5px 10px 5px 5px;cursor:pointer;font-family:inherit;color:var(--text);max-width:160px;}
+  .user-pill .user-pill-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-pill svg{color:var(--muted);flex:none;}
+  .user-ava{width:32px;height:32px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-family:"Oswald",sans-serif;font-weight:600;font-size:15px;color:#1a1204;background:var(--accent);}
+  .user-ava.sm{width:26px;height:26px;font-size:13px;}
+
+  .log-date{font-family:"Oswald",sans-serif;font-size:13px;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;}
+  .nosave{display:none;background:rgba(226,86,77,.1);border:1px solid var(--danger);color:#f0a49f;border-radius:9px;padding:10px 12px;font-size:11.5px;line-height:1.55;margin-bottom:14px;align-items:flex-start;gap:8px;}
+  .nosave.show{display:flex;}
+  .nosave span{flex:1;}
+  .nosave-x{flex:none;background:none;border:none;color:#f0a49f;font-size:14px;cursor:pointer;padding:0 2px;line-height:1;opacity:.7;}
+  .nosave-x:active{opacity:1;}
+
+  /* ---------- User sheet ---------- */
+  .user-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+  .user-pick{flex:1;display:flex;align-items:center;gap:12px;background:var(--well);border:1px solid var(--line-soft);border-radius:11px;padding:10px 12px;cursor:pointer;font-family:inherit;color:var(--text);min-width:0;text-align:left;}
+  .user-row.current .user-pick{border-color:var(--accent);}
+  .user-pick .user-rowname{font-size:15px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-pick .user-cur{font-size:10px;font-weight:700;color:var(--bg);background:var(--accent);border-radius:4px;padding:2px 6px;letter-spacing:.04em;flex:none;}
+  .user-add{display:flex;gap:8px;margin-top:14px;}
+  .user-add input{flex:1;height:var(--tap);background:var(--well);border:1px solid var(--line);border-radius:10px;color:var(--text);font-family:inherit;font-size:16px;padding:0 14px;}
+  .user-add input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(246,166,9,.14);}
+  .user-edit-cancel{width:100%;margin-top:10px;background:none;border:none;color:var(--muted);font-family:inherit;font-size:13px;cursor:pointer;text-decoration:underline;}
+  .user-recover{width:100%;margin-top:12px;height:42px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted);border-radius:9px;font-family:inherit;font-size:12px;cursor:pointer;}
+  .user-recover:active{border-color:var(--accent);color:var(--accent);}
+  .diag-out{display:none;margin-top:10px;background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;line-height:1.55;color:var(--muted);white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto;}
+  .diag-out.show{display:block;}
+  .load-more{width:100%;height:46px;margin-top:6px;background:var(--surface);border:1px solid var(--line);color:var(--accent);border-radius:10px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;}
+  .load-more:active{background:var(--surface-2);}
+  .setchips{display:flex;flex-wrap:wrap;gap:5px 6px;}
+  .setchip{font-family:"Oswald",sans-serif;font-variant-numeric:tabular-nums;background:var(--well);border:1px solid var(--line-soft);border-radius:6px;padding:2px 8px;font-size:15px;font-weight:500;color:var(--text);display:inline-flex;align-items:center;line-height:1.5;}
+  .setchip i{color:var(--faint);font-style:normal;font-size:11px;margin:0 3px;}
+  .setchip.pr{border-color:var(--accent-dim);color:var(--accent);background:rgba(246,166,9,.07);}
+  .setchip .chip-x{margin-left:6px;background:none;border:none;color:var(--faint);font-size:11px;cursor:pointer;padding:0;line-height:1;}
+  .setchip .chip-x:active{color:var(--danger);}
+  .user-hint{font-size:12px;color:var(--faint);text-align:center;margin-top:14px;line-height:1.5;}
+
+  main{padding:20px;}
+  .view{display:none;animation:fade .28s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  .eyebrow{
+    font-family:"Oswald",sans-serif;font-size:11px;font-weight:600;
+    letter-spacing:.24em;text-transform:uppercase;color:var(--faint);
+    display:flex;align-items:center;gap:10px;margin:2px 0 12px;
+  }
+  .eyebrow::after{content:"";height:1px;flex:1;background:var(--line-soft);}
+
+  /* ---------- Summary hero ---------- */
+  .hero{
+    display:grid;grid-template-columns:1fr 1fr;gap:1px;
+    background:var(--line-soft);
+    border:1px solid var(--line-soft);
+    border-radius:var(--radius);overflow:hidden;margin-bottom:24px;
+  }
+  .stat{background:var(--surface);padding:16px 18px;}
+  .stat .label{font-size:11px;color:var(--muted);letter-spacing:.08em;margin-bottom:4px;}
+  .stat .big{font-family:"Oswald",sans-serif;font-weight:600;font-size:40px;line-height:.95;color:var(--text);font-variant-numeric:tabular-nums;}
+  .stat .big.accent{color:var(--accent);}
+  .stat .unit{font-size:14px;color:var(--muted);margin-left:4px;font-family:"Noto Sans JP",sans-serif;font-weight:400;}
+
+  /* ---------- Quick log card ---------- */
+  .card{
+    background:var(--surface);border:1px solid var(--line-soft);
+    border-radius:var(--radius);padding:18px;margin-bottom:22px;
+  }
+  .field{margin-bottom:14px;}
+  .field:last-child{margin-bottom:0;}
+  .field > label{display:block;font-size:12px;color:var(--muted);letter-spacing:.06em;margin-bottom:7px;}
+  select,input[type="text"]{
+    width:100%;height:var(--tap);background:var(--well);
+    border:1px solid var(--line);border-radius:10px;color:var(--text);
+    font-family:inherit;font-size:16px;padding:0 14px;appearance:none;
+  }
+  select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a8f98' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;
+  }
+  select:focus,input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(246,166,9,.14);}
+
+  .stepper{display:flex;align-items:stretch;gap:8px;}
+  .stepper input{
+    flex:1;text-align:center;height:var(--tap);background:var(--well);
+    border:1px solid var(--line);border-radius:10px;color:var(--text);
+    font-family:"Oswald",sans-serif;font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;
+    min-width:0;
+  }
+  .stepper input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(246,166,9,.14);}
+  .step-btn{
+    width:var(--tap);height:var(--tap);flex:none;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:10px;color:var(--text);
+    font-family:"Oswald",sans-serif;font-size:24px;font-weight:500;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;user-select:none;transition:background .12s;
+  }
+  .step-btn:active{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .unit-tag{font-size:11px;color:var(--faint);font-weight:400;letter-spacing:.04em;}
+
+  .btn-primary{
+    width:100%;height:var(--tap);border:none;border-radius:10px;
+    background:var(--accent);color:#1a1204;font-family:"Oswald",sans-serif;
+    font-size:17px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    cursor:pointer;margin-top:4px;transition:transform .08s,filter .12s;
+  }
+  .btn-primary:active{transform:translateY(1px);filter:brightness(1.08);}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+
+  /* ---------- Set rows ---------- */
+  .group{margin-bottom:18px;}
+  .group-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;padding:0 2px;}
+  .group-head .name{font-size:14px;font-weight:700;letter-spacing:.02em;}
+  .group-head .vol{font-family:"Oswald",sans-serif;font-size:12px;color:var(--muted);letter-spacing:.04em;}
+  .bodypart-pill{
+    display:inline-block;font-size:10px;color:var(--accent);
+    border:1px solid var(--accent-dim);border-radius:20px;
+    padding:1px 8px;margin-left:8px;vertical-align:middle;letter-spacing:.04em;
+  }
+  .set{
+    display:flex;align-items:center;gap:12px;
+    background:var(--surface);border:1px solid var(--line-soft);
+    border-radius:11px;padding:12px 14px;margin-bottom:7px;
+    animation:pop .3s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98);}to{opacity:1;transform:none;}}
+  .set .idx{
+    font-family:"Oswald",sans-serif;font-size:13px;color:var(--faint);
+    width:22px;flex:none;text-align:center;font-weight:600;
+  }
+  .set .lift{font-family:"Oswald",sans-serif;font-weight:600;font-size:23px;line-height:1;flex:1;font-variant-numeric:tabular-nums;}
+  .set .lift .x{color:var(--faint);margin:0 6px;font-weight:400;}
+  .set .lift .kg{font-size:12px;color:var(--muted);font-family:"Noto Sans JP",sans-serif;font-weight:400;margin-left:3px;}
+  .set .pr{font-size:10px;font-weight:700;color:var(--bg);background:var(--pr);border-radius:4px;padding:2px 5px;letter-spacing:.06em;}
+  .icon-btn{
+    width:34px;height:34px;flex:none;border:none;background:transparent;
+    color:var(--faint);cursor:pointer;border-radius:8px;display:flex;
+    align-items:center;justify-content:center;transition:color .12s,background .12s;
+  }
+  .icon-btn:active{color:var(--danger);background:var(--surface-2);}
+  .icon-btn svg{width:17px;height:17px;}
+
+  /* ---------- History ---------- */
+  .filter-bar{display:flex;gap:10px;margin-bottom:18px;}
+  .filter-bar select{height:44px;font-size:14px;}
+  .day-block{margin-bottom:26px;}
+  .day-head{
+    display:flex;align-items:baseline;gap:10px;margin-bottom:12px;
+    padding-bottom:8px;border-bottom:1px solid var(--line-soft);
+  }
+  .day-head .date{font-family:"Oswald",sans-serif;font-size:19px;font-weight:600;}
+  .day-head .meta{font-size:11px;color:var(--muted);margin-left:auto;letter-spacing:.03em;}
+  .hist-split{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+  .hist-split-head{font-family:"Oswald",sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:9px;}
+  .hist-split-head.other{color:var(--faint);}
+  .hist-ex{margin-bottom:10px;}
+  .hist-ex:last-child{margin-bottom:0;}
+  .hist-ex-name{font-size:13px;font-weight:600;margin-bottom:5px;}
+  .day-edit{background:var(--surface-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;padding:3px 10px;cursor:pointer;font-family:inherit;align-self:center;}
+  .day-edit.on{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:600;}
+  .day-block.editing{background:rgba(246,166,9,.04);border:1px solid var(--accent-dim);border-radius:12px;padding:12px;margin-left:-12px;margin-right:-12px;}
+  .day-edit-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--well);border:1px solid var(--line-soft);border-radius:9px;padding:10px 12px;margin-bottom:12px;}
+  .day-edit-bar label{font-size:12px;color:var(--muted);}
+  .day-date{background:var(--surface-2);border:1px solid var(--line);border-radius:7px;color:var(--text);font-family:inherit;font-size:15px;padding:7px 9px;}
+  .day-date:focus{outline:none;border-color:var(--accent);}
+  .edit-hint{font-size:11px;color:var(--faint);}
+  .exvol{font-family:"Oswald",sans-serif;font-variant-numeric:tabular-nums;color:var(--today);font-weight:700;font-size:14px;margin-right:2px;display:inline-flex;align-items:center;}
+
+  /* ---------- Exercises tab ---------- */
+  .ex-item{
+    display:flex;align-items:center;gap:12px;
+    background:var(--surface);border:1px solid var(--line-soft);
+    border-radius:12px;padding:14px 16px;margin-bottom:9px;
+  }
+  .ex-item .ex-name{font-weight:700;font-size:15px;}
+  .ex-item .ex-meta{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:.03em;}
+  .ex-item .ex-meta .best{color:var(--accent);font-family:"Oswald",sans-serif;font-weight:600;font-variant-numeric:tabular-nums;}
+  .ex-item .ex-body{flex:1;min-width:0;}
+
+  /* ---------- Empty states ---------- */
+  .empty{
+    text-align:center;padding:40px 24px;color:var(--muted);
+    border:1px dashed var(--line);border-radius:var(--radius);
+  }
+  .empty .big{font-family:"Oswald",sans-serif;font-size:15px;color:var(--text);letter-spacing:.04em;margin-bottom:6px;}
+  .empty p{font-size:13px;line-height:1.6;}
+
+  /* ---------- Bottom nav ---------- */
+  nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    height:calc(var(--nav-h) + env(safe-area-inset-bottom));
+    padding-bottom:env(safe-area-inset-bottom);
+    background:var(--surface);border-top:1px solid var(--line);
+    display:flex;max-width:var(--maxw);margin:0 auto;
+  }
+  .tab{
+    flex:1;background:none;border:none;color:var(--faint);cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    position:relative;font-family:inherit;transition:color .14s;
+  }
+  .tab svg{width:22px;height:22px;stroke-width:2;}
+  .tab span{font-size:10px;letter-spacing:.08em;font-weight:500;}
+  .tab.active{color:var(--accent);}
+  .tab.active::before{content:"";position:absolute;top:0;width:34px;height:3px;border-radius:0 0 3px 3px;background:var(--accent);}
+
+  /* ---------- Modal ---------- */
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(8,9,11,.72);z-index:50;
+    display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);
+  }
+  .modal-bg.open{display:flex;}
+  .modal{
+    background:var(--surface);width:100%;max-width:var(--maxw);
+    border-radius:20px 20px 0 0;border-top:1px solid var(--line);
+    padding:22px 20px calc(24px + env(safe-area-inset-bottom));
+    animation:slideup .3s cubic-bezier(.2,.9,.3,1);
+  }
+  @keyframes slideup{from{transform:translateY(100%);}to{transform:none;}}
+  .modal h3{font-size:16px;font-weight:700;margin-bottom:16px;letter-spacing:.02em;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px;}
+  .chip{
+    border:1px solid var(--line);background:var(--well);color:var(--muted);
+    border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;transition:.12s;
+  }
+  .chip.sel{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:500;}
+  .modal-actions{display:flex;gap:10px;margin-top:20px;}
+  .btn-ghost{
+    flex:1;height:var(--tap);border:1px solid var(--line);background:transparent;
+    color:var(--muted);border-radius:10px;font-family:inherit;font-size:15px;cursor:pointer;
+  }
+  .btn-solid{
+    flex:1.4;height:var(--tap);border:none;background:var(--accent);color:#1a1204;
+    border-radius:10px;font-family:"Oswald",sans-serif;font-weight:600;font-size:16px;
+    letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+  }
+  .btn-solid:disabled{opacity:.4;}
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position:fixed;left:50%;transform:translateX(-50%);
+    bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom));
+    background:var(--text);color:var(--bg);font-size:13px;font-weight:500;
+    padding:10px 18px;border-radius:22px;z-index:60;opacity:0;pointer-events:none;
+    transition:opacity .2s,transform .2s;white-space:nowrap;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+
+  .add-ex-btn{
+    width:100%;height:var(--tap);background:transparent;border:1px dashed var(--line);
+    color:var(--accent);border-radius:12px;font-family:inherit;font-size:14px;font-weight:500;
+    cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .add-ex-btn:active{background:var(--surface);}
+
+  /* ---------- Per-exercise insight panel ---------- */
+  .insight{margin-bottom:14px;}
+  .insight:empty{display:none;}
+  .insight-inner{background:var(--well);border:1px solid var(--line);border-radius:12px;padding:14px 15px;animation:fade .22s ease;}
+  .ins-stats{display:flex;align-items:center;gap:10px;}
+  .ins-stat{flex:1;min-width:0;}
+  .ins-stat .lbl{font-size:10px;color:var(--muted);letter-spacing:.05em;margin-bottom:3px;}
+  .ins-stat .val{font-family:"Oswald",sans-serif;font-size:27px;font-weight:600;line-height:1;color:var(--text);font-variant-numeric:tabular-nums;}
+  .ins-stat .val span{font-size:11px;color:var(--muted);font-family:"Noto Sans JP",sans-serif;font-weight:400;margin-left:2px;}
+  .ins-stat .val.muted{color:var(--muted);}
+  .ins-delta{flex:none;min-width:56px;text-align:center;font-family:"Oswald",sans-serif;font-size:15px;font-weight:600;color:var(--faint);line-height:1.15;}
+  .ins-delta span{display:block;font-size:9px;font-family:"Noto Sans JP",sans-serif;font-weight:400;letter-spacing:.02em;margin-top:2px;}
+  .ins-delta.up{color:var(--up);}
+  .prev-wrap{margin-top:13px;padding-top:13px;border-top:1px solid var(--line-soft);}
+  .prev-wrap .ps-label{font-size:11px;color:var(--muted);letter-spacing:.03em;margin-bottom:8px;display:block;}
+  .prev-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line-soft);border-radius:8px;background:var(--well);}
+  .prev-scroll::-webkit-scrollbar{height:6px;}
+  .prev-scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  .prev-table{border-collapse:separate;border-spacing:0;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .prev-table th,.prev-table td{padding:6px 10px;text-align:center;}
+  .prev-table tbody .row-today td{padding-top:8px;padding-bottom:8px;}
+  .prev-table thead th{font-size:10px;font-weight:500;letter-spacing:.04em;color:var(--faint);background:var(--surface-2);}
+  .prev-table thead th.setno{font-family:"Oswald",sans-serif;font-size:11px;color:var(--muted);font-weight:600;border-left:1px solid var(--line);padding-bottom:2px;}
+  .prev-table thead tr.subhead th{padding-top:0;border-bottom:1px solid var(--line);}
+  .prev-table thead tr.subhead th.w{border-left:1px solid var(--line);}
+  .prev-table tbody td{font-family:"Oswald",sans-serif;font-size:16px;font-weight:500;color:var(--text);}
+  .prev-table tbody td.w{border-left:1px solid var(--line-soft);}
+  .prev-table tbody td.r{color:var(--muted);}
+  .prev-table tbody td.empty{color:var(--faint);opacity:.5;}
+  .prev-table tbody .row-prev td{color:var(--faint);border-bottom:1px solid var(--line-soft);}
+  .prev-table tbody .row-prev td.r{color:var(--faint);opacity:.75;}
+  .prev-table tbody .row-prev.latest td{color:var(--muted);border-bottom:1px solid var(--line);}
+  .prev-table tbody .row-prev.latest td.rowlab{color:var(--text);font-weight:700;}
+  .prev-table tbody .row-prev.latest td.tv{color:var(--accent-dim);}
+  /* today's row: emphasised in red */
+  .prev-table tbody .row-today td{color:var(--today);font-weight:700;background:rgba(255,111,99,.07);}
+  .prev-table tbody .row-today td.r{color:var(--today);opacity:.85;}
+  .prev-table tbody .row-today td.rowlab{color:var(--today);background:rgba(255,111,99,.07);font-weight:700;}
+  .prev-table tbody .row-today td.tv{color:var(--today);background:rgba(255,111,99,.07);font-weight:700;}
+  .prev-table tbody .row-today td.empty{color:var(--today);opacity:.3;font-weight:400;}
+  /* a set that beat last time: still red text, but on a green wash */
+  .prev-table tbody .row-today td.beat{background:rgba(111,202,90,.18);}
+  .prev-table tbody .row-today td.r.beat{background:rgba(111,202,90,.18);opacity:1;}
+  /* white outline around today's row */
+  /* white outline: 3px on every edge, closing at the last set actually recorded today */
+  .prev-table tbody .row-today td{border-top:3px solid #fff;border-bottom:3px solid #fff;border-left:none;}
+  .prev-table tbody .row-today td.w{border-left:1px solid rgba(255,255,255,.18);}
+  .prev-table tbody .row-today td.rowlab{border-left:3px solid #fff;border-radius:7px 0 0 7px;}
+  .prev-table tbody .row-today td.tv{border-right:3px solid #fff;}
+  .prev-table tbody .row-today td.rowend{border-right:3px solid #fff;border-radius:0 7px 7px 0;}
+  .prev-table tbody .row-today td:last-child:not(.outside){border-right:3px solid #fff;border-radius:0 7px 7px 0;}
+  /* cells past the last recorded set sit outside the box */
+  .prev-table tbody .row-today td.outside{border-top:none;border-bottom:none;border-left:none;background:transparent;font-weight:400;}
+  .prev-table tbody .row-today td.w.outside{border-left:1px solid var(--line-soft);}
+
+  /* sticky left columns: row label + total volume */
+  .prev-table .rowlab{position:sticky;left:0;z-index:2;text-align:left;font-family:"Noto Sans JP",sans-serif;font-size:11px;font-weight:500;padding-left:12px;padding-right:8px;width:58px;min-width:58px;max-width:58px;box-sizing:border-box;overflow:hidden;}
+  .prev-table thead th.rowlab{background:var(--surface-2);}
+  .prev-table tbody td.rowlab{background:var(--well);color:var(--muted);}
+  .prev-table tbody .row-today td.rowlab{color:var(--text);font-weight:700;}
+  .prev-table .tv{position:sticky;left:58px;z-index:2;border-right:2px solid var(--line);}
+  .prev-table thead th.tv{background:var(--surface-2);color:var(--accent);font-weight:600;}
+  .prev-table tbody td.tv{background:var(--well);color:var(--accent);font-weight:600;font-size:15px;}
+  .prev-table tbody .row-prev td.tv{color:var(--accent-dim);}
+
+  /* plan row */
+  .prev-table tbody .row-plan td{border-top:1px dashed var(--line);color:var(--faint);font-size:15px;}
+  .prev-table tbody .row-plan td.rowlab{background:var(--well);color:var(--accent);font-weight:700;}
+  .prev-table tbody .row-plan td.tv{color:var(--faint);font-weight:500;}
+  .prev-table tbody .row-plan td.past{opacity:.35;}
+  .prev-table tbody .row-plan td.next{color:var(--bg);background:var(--accent);font-weight:700;}
+  .prev-table tbody .row-plan td.w.next{border-radius:5px 0 0 5px;}
+  .prev-table tbody .row-plan td.r.next{border-radius:0 5px 5px 0;}
+  .ins-guide{margin-top:13px;padding-top:13px;border-top:1px solid var(--line-soft);}
+  .g-label{font-family:"Oswald",sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:5px;display:flex;align-items:center;gap:9px;}
+  .g-prog{font-size:10px;letter-spacing:.06em;color:var(--muted);background:var(--surface-2);border:1px solid var(--line-soft);border-radius:20px;padding:2px 9px;font-weight:500;text-transform:none;}
+  .g-rest{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+  .g-rest-label{font-size:11px;color:var(--faint);margin-right:2px;}
+  .g-rest-chip{font-size:11px;color:var(--muted);background:var(--surface-2);border:1px solid var(--line-soft);border-radius:6px;padding:3px 8px;}
+  .g-rest-chip b{font-family:"Oswald",sans-serif;font-size:12px;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums;margin-left:2px;}
+  .g-done{font-size:13px;color:var(--muted);line-height:1.7;}
+  .g-done b{font-family:"Oswald",sans-serif;font-size:15px;color:var(--text);font-variant-numeric:tabular-nums;}
+  .g-done b.up{color:var(--up);}
+  .g-main{font-family:"Oswald",sans-serif;font-size:30px;font-weight:600;color:var(--text);line-height:1;font-variant-numeric:tabular-nums;}
+  .g-main span{font-size:13px;color:var(--muted);font-family:"Noto Sans JP",sans-serif;font-weight:400;margin:0 3px;}
+  .g-reason{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.55;}
+  .apply-btn{margin-top:13px;width:100%;height:44px;background:var(--surface-2);border:1px solid var(--accent-dim);color:var(--accent);border-radius:9px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:.12s;}
+  .apply-btn:active{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+  .ins-first{font-size:13px;color:var(--muted);line-height:1.6;text-align:center;}
+
+  /* ---------- Split chips (record tab) ---------- */
+  .split-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .split-chips::-webkit-scrollbar{display:none;}
+  .split-chip{flex:none;border:1px solid var(--line);background:var(--well);color:var(--muted);border-radius:9px;padding:9px 15px;font-size:13px;font-family:inherit;font-weight:500;cursor:pointer;white-space:nowrap;transition:.12s;}
+  .split-chip.sel{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+
+  /* ---------- Exercise picker (split editor) ---------- */
+  .ex-pick{max-height:min(46vh,360px);overflow-y:auto;border:1px solid var(--line-soft);border-radius:10px;background:var(--well);}
+  .pick-group{font-family:"Oswald",sans-serif;font-size:11px;letter-spacing:.14em;color:var(--faint);padding:10px 12px 4px;text-transform:uppercase;}
+  .pick-item{display:flex;align-items:center;gap:11px;padding:11px 12px;cursor:pointer;border-top:1px solid var(--line-soft);}
+  .pick-item .pick-check{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line);flex:none;display:flex;align-items:center;justify-content:center;color:transparent;transition:.12s;}
+  .pick-item .pick-check svg{width:13px;height:13px;}
+  .pick-item.on .pick-check{background:var(--accent);border-color:var(--accent);color:var(--bg);}
+  .pick-item .pick-name{font-size:14px;font-weight:500;}
+  .pick-empty{padding:18px;color:var(--muted);font-size:13px;text-align:center;line-height:1.6;}
+
+  /* ---------- Split management (with nested exercises) ---------- */
+  .split-item{background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;padding:14px 14px 12px;margin-bottom:12px;}
+  .split-item-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .split-item .sp-name{font-weight:700;font-size:15px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .split-item .sp-count{font-family:"Oswald",sans-serif;font-size:12px;color:var(--faint);flex:none;}
+
+  .sp-ex{display:flex;align-items:center;gap:10px;background:var(--well);border:1px solid var(--line-soft);border-radius:9px;padding:9px 10px 9px 12px;margin-bottom:6px;}
+  .sp-ex-body{flex:1;min-width:0;}
+  .sp-ex-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sp-ex-meta{font-size:10px;color:var(--faint);margin-top:2px;letter-spacing:.02em;}
+  .sp-ex-meta .best{color:var(--accent-dim);font-family:"Oswald",sans-serif;font-weight:600;font-variant-numeric:tabular-nums;}
+  .icon-btn.sm{width:30px;height:30px;}
+  .edit-toggle{flex:none;background:var(--surface-2);border:1px solid var(--line);color:var(--muted);border-radius:7px;padding:5px 12px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;}
+  .edit-toggle:active{border-color:var(--accent);color:var(--accent);}
+  .edit-toggle.done{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:600;}
+  .split-item.editing{border-color:var(--accent-dim);}
+  .sp-order{display:flex;flex-direction:column;gap:2px;flex:none;margin-right:2px;}
+  .ord-btn{width:24px;height:20px;padding:0;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:5px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .ord-btn svg{width:11px;height:11px;}
+  .ord-btn:active:not(:disabled){background:var(--accent);color:var(--bg);border-color:var(--accent);}
+  .ord-btn:disabled{opacity:.25;cursor:default;}
+  .icon-btn.sm svg{width:15px;height:15px;}
+
+  .sp-add{width:100%;height:40px;background:transparent;border:1px dashed var(--line);color:var(--accent);border-radius:9px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;}
+  .sp-add:active{background:var(--surface-2);}
+  .split-empty-note{font-size:12px;color:var(--faint);padding:6px 2px 8px;}
+
+  /* new-exercise row inside the add sheet */
+  .newex-row{display:flex;gap:8px;}
+  .newex-row input{flex:1;height:var(--tap);background:var(--well);border:1px solid var(--line);border-radius:10px;color:var(--text);font-family:inherit;font-size:16px;padding:0 14px;min-width:0;}
+  .newex-row input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(246,166,9,.14);}
+  .newex-btn{flex:none;width:82px;height:var(--tap);}
+  .ex-delete{width:100%;margin-top:14px;background:none;border:none;color:var(--danger);font-family:inherit;font-size:12px;cursor:pointer;text-decoration:underline;}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <h1>筋トレログ</h1>
+        <div class="sub">Strength Log</div>
+      </div>
+    </div>
+    <button class="user-pill" id="userPillBtn" aria-label="ユーザー切り替え">
+      <span class="user-ava sm" id="pillAva">?</span>
+      <span class="user-pill-name" id="pillName">—</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <!-- ===== LOG VIEW ===== -->
+    <section class="view active" id="view-log">
+      <div class="nosave" id="noSave">
+        <span>⚠ この端末では記録が保存されません（閉じると消えます）。ホスティングしたURLから開くと保存されます。</span>
+        <button class="nosave-x" id="noSaveX" aria-label="閉じる">✕</button>
+      </div>
+      <div class="log-date num" id="logDate">—</div>
+      <div class="hero">
+        <div class="stat">
+          <div class="label">今日のセット数</div>
+          <div class="big num" id="todaySets">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">今日の総ボリューム</div>
+          <div class="big num accent" id="todayVol">0<span class="unit">kg</span></div>
+        </div>
+      </div>
+
+      <div class="eyebrow">セットを記録</div>
+      <div class="card">
+        <div class="field">
+          <label>分割</label>
+          <div class="split-chips" id="splitChips"></div>
+        </div>
+        <div class="field">
+          <label for="exSelect">種目</label>
+          <select id="exSelect"></select>
+        </div>
+        <div id="insight" class="insight"></div>
+        <div class="field">
+          <label>重量 <span class="unit-tag">kg</span></label>
+          <div class="stepper">
+            <button class="step-btn" data-t="w" data-d="-2.5" type="button">−</button>
+            <input id="inWeight" class="num" inputmode="decimal" value="20">
+            <button class="step-btn" data-t="w" data-d="2.5" type="button">＋</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>回数 <span class="unit-tag">reps</span></label>
+          <div class="stepper">
+            <button class="step-btn" data-t="r" data-d="-1" type="button">−</button>
+            <input id="inReps" class="num" inputmode="numeric" value="10">
+            <button class="step-btn" data-t="r" data-d="1" type="button">＋</button>
+          </div>
+        </div>
+        <button class="btn-primary" id="recordBtn">セットを記録</button>
+      </div>
+
+      <div class="eyebrow">今日のトレーニング</div>
+      <div id="todayList"></div>
+    </section>
+
+    <!-- ===== HISTORY VIEW ===== -->
+    <section class="view" id="view-history">
+      <div class="eyebrow">履歴</div>
+      <div class="filter-bar">
+        <select id="histFilter"></select>
+      </div>
+      <div id="historyList"></div>
+    </section>
+
+    <!-- ===== SPLITS + EXERCISES VIEW ===== -->
+    <section class="view" id="view-split">
+      <div class="eyebrow">分割と種目</div>
+      <div id="splitList"></div>
+      <button class="add-ex-btn" id="openAddSplit">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        分割を追加
+      </button>
+      <div id="orphanBlock"></div>
+    </section>
+  </main>
+
+  <nav>
+    <button class="tab active" data-view="log">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M4 9v6M20 9v6M8 8v8M16 8v8"/></svg>
+      <span>記録</span>
+    </button>
+    <button class="tab" data-view="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 4v4h4"/><path d="M12 8v4l3 2"/></svg>
+      <span>履歴</span>
+    </button>
+    <button class="tab" data-view="split">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span>分割</span>
+    </button>
+  </nav>
+</div>
+
+<!-- Add / edit exercise modal -->
+<div class="modal-bg" id="exModal">
+  <div class="modal">
+    <h3 id="exModalTitle">種目を追加</h3>
+    <div class="field">
+      <label for="exName">種目名</label>
+      <input type="text" id="exName" placeholder="例：インクラインベンチプレス" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>部位</label>
+      <div class="chip-row" id="bodyChips"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="exCancel">キャンセル</button>
+      <button class="btn-solid" id="exSave">保存</button>
+    </div>
+    <button class="ex-delete" id="exDelete" style="display:none">この種目を完全に削除（記録も消えます）</button>
+  </div>
+</div>
+
+<!-- Add / edit split modal -->
+<div class="modal-bg" id="splitModal">
+  <div class="modal">
+    <h3 id="splitModalTitle">分割を追加</h3>
+    <div class="field">
+      <label for="splitName">分割名</label>
+      <input type="text" id="splitName" placeholder="例：プッシュ / 胸の日" autocomplete="off">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="splitCancel">キャンセル</button>
+      <button class="btn-solid" id="splitSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add exercise into a split -->
+<div class="modal-bg" id="addExSheet">
+  <div class="modal">
+    <h3 id="addExTitle">種目を追加</h3>
+    <div class="field">
+      <label for="newExName">新しい種目を作る</label>
+      <div class="newex-row">
+        <input type="text" id="newExName" placeholder="種目名を入力" autocomplete="off">
+        <button class="btn-solid newex-btn" id="newExAdd">作成</button>
+      </div>
+      <div class="chip-row" id="newExBody" style="margin-top:10px"></div>
+    </div>
+    <div class="field">
+      <label>既存の種目から選ぶ</label>
+      <div class="ex-pick" id="addExPick"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="addExCancel">閉じる</button>
+      <button class="btn-solid" id="addExSave">選んだ種目を追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- User switcher sheet -->
+<div class="modal-bg" id="userSheet">
+  <div class="modal">
+    <h3>ユーザー</h3>
+    <div id="userList"></div>
+    <div class="user-add">
+      <input type="text" id="userNameInput" placeholder="名前を入力（例：たろう）" autocomplete="off" maxlength="20">
+      <button class="btn-solid" id="userAddBtn" style="flex:none;width:88px">追加</button>
+    </div>
+    <button class="user-edit-cancel" id="userEditCancel" style="display:none">編集をやめる</button>
+    <button class="user-recover" id="userRecoverBtn">保存済みデータを探して復元</button>
+    <button class="user-recover" id="userForceBtn" style="border-color:var(--accent-dim);color:var(--accent)">Excelデータを強制的に取り込み直す</button>
+    <button class="user-recover" id="userDiagBtn">診断情報を表示</button>
+    <pre id="diagOut" class="diag-out"></pre>
+    <div class="user-hint">ユーザーごとに種目・分割・記録が別々に保存されます。</div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script id="sugano-bundle" src="sugano-bundle.local.js"></script>
+
+
+<script>
+(function(){
+  "use strict";
+
+  const BODYPARTS = ["胸","背中","脚","肩","腕","体幹","その他"];
+  const uid = () => (crypto.randomUUID ? crypto.randomUUID() : "id"+Date.now()+Math.random().toString(16).slice(2));
+  const AVATAR_COLORS = ["#f6a609","#4dab7f","#e07a5f","#8b7fd6","#5aa9e6","#d98cc4"];
+
+  // ---- state ----
+  let data = { exercises:[], sets:[], splits:[] };
+  let meta = { users:[], currentUserId:null };
+  let editingExId = null;
+  let selectedBody = "胸";
+  let activeSplit = "__all";
+  let editingSplitId = null;
+  let editModeSplit = null;
+  let editingUserId = null;
+  let recovered = 0;
+  let historyLimit = 30;
+  let editHistDay = null;
+
+  // ---- storage layer: window.storage (Claude) -> localStorage (standalone) -> memory ----
+  const MKEY = "strengthlog:meta:v1";
+  const OLD_KEY = "strengthlog:data:v1";
+  const uKey = id => "strengthlog:user:"+id+":v1";
+  const mem = {};
+  // Which backend actually works is decided by a real round-trip probe (see probeBackend).
+  let backend = "memory";   // "ws" | "ls" | "memory"
+  let hasWS = false, hasLS = false;
+
+  async function probeBackend(){
+    const k = "strengthlog:__probe";
+    // 1) window.storage — must actually write AND read back
+    try{
+      if(typeof window!=="undefined" && window.storage && typeof window.storage.get==="function"){
+        await window.storage.set(k,"ok");
+        const r = await window.storage.get(k);
+        if(r && r.value === "ok"){
+          backend="ws"; hasWS=true;
+          try{ await window.storage.delete(k); }catch(e){}
+          return;
+        }
+      }
+    }catch(e){}
+    // 2) localStorage
+    try{
+      localStorage.setItem(k,"ok");
+      if(localStorage.getItem(k)==="ok"){ backend="ls"; hasLS=true; localStorage.removeItem(k); return; }
+    }catch(e){}
+    // 3) memory only — the session works, but nothing persists
+    backend="memory";
+  }
+
+  async function sGet(key){
+    if(backend==="ws"){
+      try{ const r=await window.storage.get(key); if(r && r.value!=null) return r.value; }catch(e){}
+      return (key in mem) ? mem[key] : null;      // fall back to this session's cache
+    }
+    if(backend==="ls"){
+      try{ const v=localStorage.getItem(key); if(v!=null) return v; }catch(e){}
+      return (key in mem) ? mem[key] : null;
+    }
+    return (key in mem) ? mem[key] : null;
+  }
+  async function sSet(key,val){
+    mem[key]=val;                                  // always keep it in memory
+    if(backend==="ws"){ try{ await window.storage.set(key,val); }catch(e){ console.error("storage.set failed",e); } return; }
+    if(backend==="ls"){ try{ localStorage.setItem(key,val); }catch(e){ console.error("localStorage failed",e); } return; }
+  }
+  async function sDel(key){
+    delete mem[key];
+    if(backend==="ws"){ try{ await window.storage.delete(key); }catch(e){} return; }
+    if(backend==="ls"){ try{ localStorage.removeItem(key); }catch(e){} return; }
+  }
+  // list keys under a prefix — used to recover profiles if the index is lost
+  async function sList(prefix){
+    const out = new Set(Object.keys(mem).filter(k=>k.indexOf(prefix)===0));
+    if(backend==="ws"){
+      try{ const r=await window.storage.list(prefix); if(r && r.keys) r.keys.forEach(k=>out.add(k)); }catch(e){}
+    } else if(backend==="ls"){
+      try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.indexOf(prefix)===0) out.add(k); } }catch(e){}
+    }
+    return [...out];
+  }
+  const USER_PREFIX = "strengthlog:user:";
+  function idFromUserKey(k){ const m=k.match(/^strengthlog:user:(.+):v1$/); return m?m[1]:null; }
+
+  function seedData(){
+    const ex=[
+      {id:uid(),name:"ベンチプレス",body:"胸"},
+      {id:uid(),name:"ショルダープレス",body:"肩"},
+      {id:uid(),name:"ラットプルダウン",body:"背中"},
+      {id:uid(),name:"デッドリフト",body:"背中"},
+      {id:uid(),name:"スクワット",body:"脚"},
+    ];
+    return {
+      exercises:ex,
+      splits:[
+        {id:uid(),name:"プッシュ",exIds:[ex[0].id,ex[1].id]},
+        {id:uid(),name:"プル",exIds:[ex[2].id,ex[3].id]},
+        {id:uid(),name:"脚",exIds:[ex[4].id]},
+      ],
+      sets:[]
+    };
+  }
+  function normalize(d){
+    if(!d || !Array.isArray(d.exercises)) d = seedData();
+    if(!Array.isArray(d.sets)) d.sets = [];
+    if(!Array.isArray(d.splits)) d.splits = [];
+    return d;
+  }
+
+  async function save(){
+    const u=meta.users.find(x=>x.id===meta.currentUserId);
+    if(u) data.__name = u.name;   // self-describing blob: survives index loss
+    await sSet(uKey(meta.currentUserId), JSON.stringify(data));
+  }
+  async function saveMeta(){ await sSet(MKEY, JSON.stringify(meta)); }
+
+  // Guess a profile's name from its contents (for blobs saved before names were stored)
+  function guessName(d){
+    if(d && d.__name) return d.__name;
+    try{
+      const b = window.SUGANO_BUNDLE;
+      if(b && b.data && d && Array.isArray(d.exercises) && d.exercises.length){
+        const bundleNames = new Set(b.data.exercises.map(e=>e.name));
+        const hit = d.exercises.filter(e=>bundleNames.has(e.name)).length;
+        // heavily overlapping exercise list -> this is the imported profile
+        if(d.exercises.length >= 20 && hit / d.exercises.length >= 0.8) return b.userName;
+      }
+    }catch(e){}
+    return null;
+  }
+
+  // Rebuild the user index by scanning storage. Never destroys data.
+  async function recoverUsers(){
+    const keys = await sList(USER_PREFIX);
+    const found = [];
+    for(const k of keys){
+      const id = idFromUserKey(k);
+      if(!id) continue;
+      let name = null, sets = 0;
+      try{
+        const raw = await sGet(k);
+        if(raw){ const d = JSON.parse(raw); name = guessName(d); sets = Array.isArray(d.sets)?d.sets.length:0; }
+      }catch(e){}
+      found.push({ id, name, sets });
+    }
+    return found;
+  }
+
+  // Every startup: re-attach any profile blobs that the index has lost track of.
+  async function reconcileUsers(){
+    const orphans = await recoverUsers();
+    const known = new Set(meta.users.map(u=>u.id));
+    const missing = orphans.filter(o=>!known.has(o.id) && o.sets>0);
+    if(!missing.length) return 0;
+    let n=0, total=0;
+    missing.forEach(o=>{ meta.users.push({id:o.id, name:o.name || ("復元ユーザー"+(++n))}); total+=o.sets; });
+    // if the profile we're about to show is empty, switch to the richest recovered one
+    const cur = orphans.find(o=>o.id===meta.currentUserId);
+    if(!cur || cur.sets===0){
+      meta.currentUserId = missing.slice().sort((a,b)=>b.sets-a.sets)[0].id;
+    }
+    await saveMeta();
+    return total;
+  }
+
+  async function loadMeta(){
+    const raw = await sGet(MKEY);
+    if(raw){ try{ meta = JSON.parse(raw); }catch(e){ meta = null; } }
+
+    if(!meta || !Array.isArray(meta.users) || !meta.users.length){
+      // The index is missing or unreadable. Before assuming "first run",
+      // scan storage — profile data may still be there, just unreferenced.
+      const orphans = await recoverUsers();
+      if(orphans.length){
+        let n = 0;
+        meta = {
+          users: orphans.map(o => ({ id:o.id, name: o.name || ("復元ユーザー"+(++n)) })),
+          currentUserId: null
+        };
+        // prefer the profile with the most records
+        const best = orphans.slice().sort((a,b)=>b.sets-a.sets)[0];
+        meta.currentUserId = best.id;
+        await saveMeta();
+        recovered = orphans.reduce((a,o)=>a+o.sets,0);
+      } else {
+        // genuinely a first run: migrate any legacy single-user data
+        const oldRaw = await sGet(OLD_KEY);
+        const id1 = uid();
+        meta = { users:[{id:id1,name:"自分"}], currentUserId:id1 };
+        let first = null;
+        if(oldRaw){ try{ first = JSON.parse(oldRaw); }catch(e){ first = null; } }
+        const d = normalize(first); d.__name = "自分";
+        await sSet(uKey(id1), JSON.stringify(d));
+        await saveMeta();
+      }
+    }
+    if(!meta.currentUserId || !meta.users.some(u=>u.id===meta.currentUserId)){
+      meta.currentUserId = meta.users[0].id;
+    }
+  }
+
+  async function loadUserData(){
+    const raw = await sGet(uKey(meta.currentUserId));
+    let d = null;
+    if(raw){ try{ d = JSON.parse(raw); }catch(e){ d = null; } }
+    if(!d){
+      // Read failed. Do NOT silently replace real records with seed data:
+      // seed only when this profile has genuinely never been written.
+      const written = (uKey(meta.currentUserId) in mem);
+      if(written){ try{ d = JSON.parse(mem[uKey(meta.currentUserId)]); }catch(e){ d = null; } }
+    }
+    data = normalize(d);
+  }
+
+  // Import a bundled dataset (e.g. from a spreadsheet). Runs once per importId.
+  // If the profile already exists, merge in only the new sets (never wipes in-app records).
+  async function maybeImport(){
+    const b = (typeof window!=="undefined") ? window.SUGANO_BUNDLE : null;
+    if(!b || !b.importId || !b.data) return;
+    const flag = "strengthlog:import:"+b.importId;
+    const name = b.userName || "インポート";
+    const existing = meta.users.find(u=>u.name===name);
+    let done=null;
+    try{ done = await sGet(flag); }catch(e){}
+    // Safety net: the flag says "already imported", but verify the data is actually there.
+    if(done && existing){
+      let ok=false;
+      try{ const raw=await sGet(uKey(existing.id)); if(raw){ const d=JSON.parse(raw); ok = Array.isArray(d.sets) && d.sets.length>0; } }catch(e){}
+      if(ok) return;   // genuinely present — nothing to do
+      // profile exists but its records are gone: restore from the embedded bundle
+    }
+
+    const incoming = normalize(JSON.parse(JSON.stringify(b.data)));
+    incoming.__name = name;
+
+    if(!existing){
+      const id = uid();
+      meta.users.push({ id, name });
+      await sSet(uKey(id), JSON.stringify(incoming));
+      meta.currentUserId = id;
+    } else {
+      // merge: keep the current profile, add exercises/splits/sets that aren't there yet
+      let cur=null;
+      try{ const raw=await sGet(uKey(existing.id)); cur = raw?normalize(JSON.parse(raw)):null; }catch(e){}
+      if(!cur){
+        await sSet(uKey(existing.id), JSON.stringify(incoming));
+      } else {
+        // map incoming exercise ids -> existing ids (match by name)
+        const byName={}; cur.exercises.forEach(e=>{ byName[e.name]=e.id; });
+        incoming.exercises.forEach(e=>{
+          if(!byName[e.name]){ cur.exercises.push({id:e.id,name:e.name,body:e.body}); byName[e.name]=e.id; }
+        });
+        const inName={}; incoming.exercises.forEach(e=>{ inName[e.id]=e.name; });
+        const remap = inId => byName[inName[inId]] || inId;
+
+        // splits: add missing ones; for existing splits, add any missing exercise refs
+        const curSplitByName={}; cur.splits.forEach(s=>{ curSplitByName[s.name]=s; });
+        incoming.splits.forEach(s=>{
+          const ids=s.exIds.map(remap);
+          const t=curSplitByName[s.name];
+          if(!t){ cur.splits.push({id:s.id,name:s.name,exIds:ids}); }
+          else { ids.forEach(id=>{ if(!t.exIds.includes(id)) t.exIds.push(id); }); }
+        });
+
+        // sets: dedupe on (exercise, day, weight, reps, order-within-day)
+        const sig = s => [s.exId, dateKey(s.ts), s.weight, s.reps].join("|");
+        const seen = {};
+        cur.sets.forEach(s=>{ const k=sig(s); seen[k]=(seen[k]||0)+1; });
+        const need = {};
+        incoming.sets.forEach(s=>{ const k=[remap(s.exId),dateKey(s.ts),s.weight,s.reps].join("|"); need[k]=(need[k]||0)+1; });
+        let addedN=0;
+        incoming.sets.sort((a,b)=>a.ts-b.ts).forEach(s=>{
+          const exId=remap(s.exId);
+          const k=[exId,dateKey(s.ts),s.weight,s.reps].join("|");
+          const have=seen[k]||0;
+          if(have>0){ seen[k]=have-1; return; }   // already present
+          cur.sets.push({id:uid(),exId,weight:s.weight,reps:s.reps,ts:s.ts});
+          addedN++;
+        });
+        cur.sets.sort((a,b)=>a.ts-b.ts);
+        await sSet(uKey(existing.id), JSON.stringify(cur));
+        if(addedN) console.log("[import] added",addedN,"new sets to",name);
+      }
+      meta.currentUserId = existing.id;
+    }
+    await saveMeta();
+    await sSet(flag,"1");
+  }
+
+  // ---- date helpers ----
+  const WD = ["日","月","火","水","木","金","土"];
+  function dateKey(ts){ const d=new Date(ts); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function todayKey(){ return dateKey(Date.now()); }
+  function fmtDateFull(key){ const [y,m,d]=key.split("-").map(Number); const dt=new Date(y,m-1,d); return {main:m+"/"+d, sub:"("+WD[dt.getDay()]+")", year:y}; }
+
+  // ---- toast ----
+  let toastT;
+  function toast(msg){
+    const el=document.getElementById("toast");
+    el.textContent=msg; el.classList.add("show");
+    clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),1600);
+  }
+
+  // ---- computed ----
+  function exName(id){ const e=data.exercises.find(x=>x.id===id); return e?e.name:"削除された種目"; }
+  function exBody(id){ const e=data.exercises.find(x=>x.id===id); return e?e.body:null; }
+  function best(exId){
+    const s=data.sets.filter(x=>x.exId===exId);
+    if(!s.length) return null;
+    return s.reduce((a,b)=> b.weight>a.weight?b:a);
+  }
+
+  // ---- per-exercise insight (current vs previous + today's target) ----
+  function exSessions(exId){
+    const m={};
+    data.sets.forEach(s=>{ if(s.exId===exId){ const k=dateKey(s.ts); (m[k]=m[k]||[]).push(s); } });
+    return m;
+  }
+  function todaySetsOf(exId){
+    const tk=todayKey();
+    return data.sets.filter(s=>s.exId===exId && dateKey(s.ts)===tk).sort((a,b)=>a.ts-b.ts);
+  }
+  function todayExVol(exId){ let v=0; todaySetsOf(exId).forEach(s=>v+=s.weight*s.reps); return v; }
+  function prevSession(exId){
+    const m=exSessions(exId); const tk=todayKey();
+    const keys=Object.keys(m).filter(k=>k<tk).sort((a,b)=>b.localeCompare(a));
+    if(!keys.length) return null;
+    const sets=m[keys[0]].sort((a,b)=>a.ts-b.ts);
+    let vol=0; sets.forEach(s=>vol+=s.weight*s.reps);
+    return {dateKey:keys[0], sets, vol};
+  }
+  // last N sessions (excluding today), newest first
+  function recentSessions(exId, n){
+    const m=exSessions(exId); const tk=todayKey();
+    const keys=Object.keys(m).filter(k=>k<tk).sort((a,b)=>b.localeCompare(a)).slice(0,n);
+    return keys.map(k=>{
+      const sets=m[k].slice().sort((a,b)=>a.ts-b.ts);
+      let vol=0; sets.forEach(s=>vol+=s.weight*s.reps);
+      return {dateKey:k, sets, vol};
+    });
+  }
+  function e1RM(w,r){ return w*(1+r/30); }
+  // target for one set, based on the matching set from last time
+  function targetFor(p){
+    if(p.reps>=10) return {weight:Math.round((p.weight+2.5)*10)/10, reps:p.reps, why:"up"};
+    if(p.reps>=5)  return {weight:p.weight, reps:p.reps+1, why:"reps"};
+    return {weight:p.weight, reps:Math.max(p.reps,1), why:"same"};
+  }
+  // full plan for today: one target per set of the previous session
+  function planFor(exId){
+    const prev=prevSession(exId);
+    const done=todaySetsOf(exId);
+    if(!prev || !prev.sets.length){
+      if(!done.length) return {kind:"first"};
+      const top=done.reduce((a,b)=>(b.weight>a.weight||(b.weight===a.weight&&b.reps>a.reps))?b:a);
+      const t=targetFor(top);
+      return {kind:"noprev", next:t, doneCount:done.length, est:Math.round(e1RM(top.weight,top.reps))};
+    }
+    const targets=prev.sets.map(targetFor);
+    const total=targets.length;
+    const doneCount=done.length;
+    const remaining=targets.slice(doneCount);
+    const planVol=targets.reduce((a,t)=>a+t.weight*t.reps,0);
+    const top=prev.sets.reduce((a,b)=>(b.weight>a.weight||(b.weight===a.weight&&b.reps>a.reps))?b:a);
+    return {
+      kind: remaining.length ? "ok" : "done",
+      targets, remaining, total, doneCount,
+      next: remaining[0] || null,
+      planVol,
+      est: Math.round(e1RM(top.weight,top.reps)),
+      prevVol: prev.vol
+    };
+  }
+  function fmtMD(k){ const [,m,d]=k.split("-").map(Number); return m+"/"+d; }
+
+  function renderInsight(){
+    const box=document.getElementById("insight");
+    const exId=document.getElementById("exSelect").value;
+    if(!exId){ box.innerHTML=""; return; }
+    const prev=prevSession(exId);
+    const tVol=todayExVol(exId);
+    const s=planFor(exId);
+
+    let deltaHtml;
+    if(prev && tVol>0){
+      const diff=tVol-prev.vol;
+      deltaHtml = diff>=0
+        ? `<div class="ins-delta up">▲${fmtNum(diff)}<span>前回超え</span></div>`
+        : `<div class="ins-delta">▼${fmtNum(-diff)}<span>あと少し</span></div>`;
+    } else {
+      deltaHtml = `<div class="ins-delta">vs</div>`;
+    }
+    const statsHtml=`<div class="ins-stats">
+      <div class="ins-stat"><div class="lbl">今日のボリューム</div><div class="val num">${fmtNum(tVol)}<span>kg</span></div></div>
+      ${deltaHtml}
+      <div class="ins-stat" style="text-align:right"><div class="lbl">前回 ${prev?fmtMD(prev.dateKey):""}</div><div class="val num muted">${prev?fmtNum(prev.vol):"—"}<span>kg</span></div></div>
+    </div>`;
+
+    const tSets = todaySetsOf(exId);
+    const history = recentSessions(exId, 5);   // last 5 sessions, newest first
+    const compareHtml = (history.length || tSets.length)
+      ? (function(){
+          // widest session decides the number of set columns
+          let n = tSets.length;
+          history.forEach(h=>{ if(h.sets.length>n) n=h.sets.length; });
+          if(s.targets && s.targets.length>n) n=s.targets.length;
+          if(!n) return "";
+
+          let h1 = `<th class="rowlab"></th><th class="tv">総ボリューム</th>`;
+          let h2 = `<th class="rowlab"></th><th class="tv"></th>`;
+          for(let i=0;i<n;i++){
+            h1 += `<th class="setno" colspan="2">${i+1}</th>`;
+            h2 += `<th class="w">重量</th><th class="r">回数</th>`;
+          }
+
+          function bodyRow(label, sets, vol, cls, compareTo){
+            const isToday = cls.indexOf("row-today")>=0;
+            const last = sets.length-1;   // close the box at the last recorded set
+            let tds = `<td class="rowlab">${label}</td><td class="tv">${sets.length?fmtNum(vol):"—"}</td>`;
+            for(let i=0;i<n;i++){
+              const x = sets[i];
+              if(!x){
+                const out = isToday ? " outside" : "";
+                tds += `<td class="w empty${out}">·</td><td class="r empty${out}">·</td>`;
+                continue;
+              }
+              let c = "";
+              if(compareTo && compareTo[i] && x.weight*x.reps > compareTo[i].weight*compareTo[i].reps) c = " beat";
+              const endW = (isToday && i===last) ? " rowend" : "";
+              tds += `<td class="w${c}">${fmtNum(x.weight)}</td><td class="r${c}${endW}">${x.reps}</td>`;
+            }
+            return `<tr class="${cls}">${tds}</tr>`;
+          }
+
+          // oldest -> newest so the eye reads progression downward
+          const past = history.slice().reverse();
+          const prevSets = prev ? prev.sets : null;
+          let rows = past.map((h,i)=>{
+            const isLatest = (i === past.length-1);
+            return bodyRow(fmtMD(h.dateKey), h.sets, h.vol, "row-prev"+(isLatest?" latest":""), null);
+          }).join("");
+          if(!past.length) rows = bodyRow("前回", [], 0, "row-prev", null);
+
+          rows += bodyRow("今日", tSets, todayExVol(exId), "row-today", prevSets);
+
+          if(s.targets && s.targets.length){
+            let tds = `<td class="rowlab">目安</td><td class="tv">${fmtNum(s.planVol)}</td>`;
+            for(let i=0;i<n;i++){
+              const t = s.targets[i];
+              if(!t){ tds += `<td class="w empty">·</td><td class="r empty">·</td>`; continue; }
+              const isNext = (i === s.doneCount);
+              const c = isNext ? " next" : (i < s.doneCount ? " past" : "");
+              tds += `<td class="w${c}">${fmtNum(t.weight)}</td><td class="r${c}">${t.reps}</td>`;
+            }
+            rows += `<tr class="row-plan">${tds}</tr>`;
+          }
+
+          const label = past.length>1 ? `直近${past.length}回の記録と比較` : "前回との比較";
+          return `<div class="prev-wrap">
+            <span class="ps-label">${label}</span>
+            <div class="prev-scroll"><table class="prev-table">
+              <thead><tr>${h1}</tr><tr class="subhead">${h2}</tr></thead>
+              <tbody>${rows}</tbody>
+            </table></div>
+          </div>`;
+        })()
+      : "";
+
+    const WHY={up:"前回より重く", reps:"回数を1つ伸ばす", same:"同じ重量で確実に"};
+    let guideHtml;
+    if(s.kind==="ok"){
+      const t=s.next;
+      const setNo=s.doneCount+1;
+      const rest=s.remaining.slice(1);
+      const restHtml = rest.length
+        ? `<div class="g-rest"><span class="g-rest-label">このあと</span>${rest.map((x,i)=>`<span class="g-rest-chip">${setNo+1+i}セット目 <b>${fmtNum(x.weight)}×${x.reps}</b></span>`).join("")}</div>`
+        : `<div class="g-rest"><span class="g-rest-label">これが最終セットです</span></div>`;
+      guideHtml=`<div class="ins-guide">
+        <div class="g-label">次のセットの目安 <span class="g-prog">${setNo} / ${s.total} セット目</span></div>
+        <div class="g-main num">${fmtNum(t.weight)}<span>kg</span> × ${t.reps}</div>
+        <div class="g-reason">${WHY[t.why]} ・ 前回の${setNo}セット目が基準 ・ 推定1RM ${s.est}kg</div>
+        <button class="apply-btn" data-apply data-w="${t.weight}" data-r="${t.reps}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          この目安を入力
+        </button>
+        ${restHtml}
+      </div>`;
+    } else if(s.kind==="done"){
+      const diff=tVol-s.prevVol;
+      guideHtml=`<div class="ins-guide">
+        <div class="g-label">今日のメニュー完了</div>
+        <div class="g-done">${s.total}セットすべて記録しました。<br>
+        ${diff>=0?`前回を <b class="up">${fmtNum(diff)}kg</b> 上回っています。お疲れさまでした。`:`前回まであと <b>${fmtNum(-diff)}kg</b>。追加でセットを組んでもOKです。`}</div>
+      </div>`;
+    } else if(s.kind==="noprev"){
+      const t=s.next;
+      guideHtml=`<div class="ins-guide">
+        <div class="g-label">次のセットの目安</div>
+        <div class="g-main num">${fmtNum(t.weight)}<span>kg</span> × ${t.reps}</div>
+        <div class="g-reason">今日のセットを基準にした目安 ・ 推定1RM ${s.est}kg</div>
+        <button class="apply-btn" data-apply data-w="${t.weight}" data-r="${t.reps}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          この目安を入力
+        </button>
+      </div>`;
+    } else {
+      guideHtml=`<div class="ins-guide"><div class="ins-first">この種目はまだ記録がありません。<br>軽めの重量でフォームを確認しながら始めて、感覚をつかんだら少しずつ増やしていきましょう。</div></div>`;
+    }
+
+    box.innerHTML=`<div class="insight-inner">${statsHtml}${compareHtml}${guideHtml}</div>`;
+  }
+
+  // ---- SVG ----
+  const TRASH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/></svg>';
+  const EDIT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+  const MINUS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>';
+  const CARET_UP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>';
+  const CARET_DOWN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+
+  // ---- render: header ----
+  function renderHeader(){
+    const d=new Date();
+    document.getElementById("logDate").textContent=(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+")";
+  }
+
+  // ---- users / profiles ----
+  function userColor(id){
+    const i=meta.users.findIndex(u=>u.id===id);
+    return AVATAR_COLORS[(i<0?0:i)%AVATAR_COLORS.length];
+  }
+  function initial(name){ const s=[...(name||"")].filter(c=>c.trim()); return s.length?s[0]:"?"; }
+
+  function renderUserPill(){
+    const u=meta.users.find(x=>x.id===meta.currentUserId);
+    const ava=document.getElementById("pillAva");
+    ava.textContent=initial(u&&u.name);
+    ava.style.background=userColor(meta.currentUserId);
+    document.getElementById("pillName").textContent=u?u.name:"—";
+  }
+
+  function openUserSheet(){ editingUserId=null; resetUserAddBar(); renderUserList(); document.getElementById("userSheet").classList.add("open"); }
+  function closeUserSheet(){ document.getElementById("userSheet").classList.remove("open"); editingUserId=null; resetUserAddBar(); }
+
+  function resetUserAddBar(){
+    const inp=document.getElementById("userNameInput");
+    inp.value="";
+    document.getElementById("userAddBtn").textContent = editingUserId ? "更新" : "追加";
+    document.getElementById("userEditCancel").style.display = editingUserId ? "block" : "none";
+  }
+
+  function renderUserList(){
+    const wrap=document.getElementById("userList");
+    wrap.innerHTML=meta.users.map(u=>{
+      const cur=u.id===meta.currentUserId;
+      return `<div class="user-row ${cur?"current":""}">
+        <button class="user-pick" data-userpick="${u.id}">
+          <span class="user-ava" style="background:${userColor(u.id)}">${escapeHtml(initial(u.name))}</span>
+          <span class="user-rowname">${escapeHtml(u.name)}</span>
+          ${cur?'<span class="user-cur">使用中</span>':''}
+        </button>
+        <button class="icon-btn" style="color:var(--muted)" data-useredit="${u.id}" aria-label="名前を編集">${EDIT}</button>
+        <button class="icon-btn" data-userdel="${u.id}" aria-label="削除">${TRASH}</button>
+      </div>`;
+    }).join("");
+  }
+
+  async function switchUser(id){
+    if(id===meta.currentUserId){ closeUserSheet(); return; }
+    meta.currentUserId=id; await saveMeta();
+    await loadUserData(); activeSplit="__all";
+    renderUserPill(); renderAll(); closeUserSheet();
+    const u=meta.users.find(x=>x.id===id);
+    toast((u?u.name:"")+" に切り替えました");
+  }
+
+  async function commitUser(){
+    const inp=document.getElementById("userNameInput");
+    const name=inp.value.trim();
+    if(!name){ toast("名前を入力してください"); return; }
+    if(editingUserId){
+      const u=meta.users.find(x=>x.id===editingUserId);
+      if(u) u.name=name;
+      editingUserId=null;
+      await saveMeta(); renderUserPill();
+      toast("名前を更新しました");
+    }else{
+      const id=uid();
+      meta.users.push({id,name});
+      const seeded=seedData(); seeded.__name=name;
+      await sSet(uKey(id), JSON.stringify(seeded));
+      await saveMeta();
+      toast(name+" を追加しました");
+    }
+    resetUserAddBar(); renderUserList();
+  }
+
+  function startEditUser(id){
+    editingUserId=id;
+    const u=meta.users.find(x=>x.id===id);
+    const inp=document.getElementById("userNameInput");
+    inp.value=u?u.name:"";
+    document.getElementById("userAddBtn").textContent="更新";
+    document.getElementById("userEditCancel").style.display="block";
+    inp.focus();
+  }
+
+  async function runRecovery(){
+    const total = await reconcileUsers();
+    if(!total){ toast("復元できるデータはありませんでした"); return; }
+    await loadUserData();
+    activeSplit="__all";
+    renderUserPill(); renderUserList(); renderAll();
+    toast(`${total}セットを復元しました`);
+  }
+
+  // ---- diagnostics & forced restore ----
+  async function runDiagnostics(){
+    const el=document.getElementById("diagOut");
+    if(el.classList.contains("show")){ el.classList.remove("show"); el.textContent=""; return; }
+    el.classList.add("show");
+    el.textContent="調べています...";
+    const L=[];
+    const NAMES={ws:"window.storage (保存OK)", ls:"localStorage (保存OK)", memory:"メモリのみ ← 保存されません"};
+    L.push("storage: "+NAMES[backend]);
+    L.push("bundle: "+(window.SUGANO_BUNDLE?("あり / "+window.SUGANO_BUNDLE.data.sets.length+"セット / id="+window.SUGANO_BUNDLE.importId):"なし"));
+    // can we write and read back?
+    let rt="?";
+    try{ await sSet("strengthlog:__probe","ok"); const v=await sGet("strengthlog:__probe"); rt=(v==="ok")?"OK":("読み戻し失敗("+v+")"); await sDel("strengthlog:__probe"); }
+    catch(e){ rt="例外: "+e.message; }
+    L.push("書き込みテスト: "+rt);
+    const keys=await sList("strengthlog:");
+    L.push("キー数: "+keys.length);
+    for(const k of keys.slice(0,20)){
+      let info="";
+      try{ const raw=await sGet(k); if(raw){ if(k.indexOf(USER_PREFIX)===0){ const d=JSON.parse(raw); info=" ["+(d.__name||guessName(d)||"名前なし")+" / "+(d.sets?d.sets.length:0)+"セット]"; } else { info=" = "+String(raw).slice(0,60); } } else info=" (読めず)"; }
+      catch(e){ info=" (例外)"; }
+      L.push("  "+k+info);
+    }
+    L.push("meta.users: "+meta.users.map(u=>u.name).join(", "));
+    L.push("表示中: "+(meta.users.find(u=>u.id===meta.currentUserId)||{}).name);
+    L.push("現在の記録数: "+data.sets.length+"セット / 種目 "+data.exercises.length);
+    el.textContent=L.join("\n");
+  }
+
+  // Force re-import from the embedded bundle, replacing that profile only.
+  async function forceImport(){
+    const b=window.SUGANO_BUNDLE;
+    if(!b || !b.data){ toast("埋め込みデータが見つかりません"); return; }
+    if(!confirm(`Excelの${b.data.sets.length}セットを「${b.userName}」として取り込み直します。\n同名ユーザーの記録は置き換わります。よろしいですか？`)) return;
+    const incoming=normalize(JSON.parse(JSON.stringify(b.data)));
+    incoming.__name=b.userName;
+    let u=meta.users.find(x=>x.name===b.userName);
+    if(!u){ u={id:uid(),name:b.userName}; meta.users.push(u); }
+    await sSet(uKey(u.id), JSON.stringify(incoming));
+    meta.currentUserId=u.id;
+    await saveMeta();
+    await sSet("strengthlog:import:"+b.importId,"1");
+    await loadUserData();
+    activeSplit="__all";
+    renderUserPill(); renderUserList(); renderAll();
+    toast(b.data.sets.length+"セットを取り込みました");
+  }
+
+  async function delUser(id){
+    if(meta.users.length<=1){ toast("最後のユーザーは削除できません"); return; }
+    const u=meta.users.find(x=>x.id===id);
+    if(!confirm(`ユーザー「${u?u.name:""}」を削除しますか？\nこのユーザーの記録・種目・分割もすべて削除されます。`)) return;
+    meta.users=meta.users.filter(x=>x.id!==id);
+    await sDel(uKey(id));
+    if(editingUserId===id){ editingUserId=null; resetUserAddBar(); }
+    if(meta.currentUserId===id){
+      meta.currentUserId=meta.users[0].id;
+      await saveMeta(); await loadUserData(); activeSplit="__all";
+      renderUserPill(); renderAll();
+    }else{
+      await saveMeta();
+    }
+    renderUserList();
+  }
+
+  // ---- render: exercise select ----
+  function renderSelects(){
+    const sel=document.getElementById("exSelect");
+    const prev=sel.value;
+    // filter by active split; if that split is empty, fall back to every exercise
+    let list=data.exercises;
+    if(activeSplit!=="__all"){
+      const sp=data.splits.find(s=>s.id===activeSplit);
+      const ids=sp?new Set(sp.exIds):new Set();
+      // keep the order defined inside the split
+      const filtered=sp?sp.exIds.map(id=>data.exercises.find(e=>e.id===id)).filter(Boolean):[];
+      if(filtered.length) list=filtered;
+    }
+    const byBody={};
+    list.forEach(e=>{ (byBody[e.body||"その他"] ||= []).push(e); });
+    let html="";
+    BODYPARTS.forEach(b=>{
+      if(byBody[b]){
+        html+=`<optgroup label="${b}">`;
+        byBody[b].forEach(e=>{ html+=`<option value="${e.id}">${escapeHtml(e.name)}</option>`; });
+        html+="</optgroup>";
+      }
+    });
+    const emptyMsg = activeSplit==="__all" ? "種目がありません" : "この分割に種目がありません";
+    sel.innerHTML=html || `<option value="">${emptyMsg}</option>`;
+    if(prev && list.some(e=>e.id===prev)) sel.value=prev;
+
+    // history filter
+    const hf=document.getElementById("histFilter");
+    const hprev=hf.value;
+    let hhtml=`<option value="__all">すべての種目</option>`;
+    data.exercises.forEach(e=>{ hhtml+=`<option value="${e.id}">${escapeHtml(e.name)}</option>`; });
+    hf.innerHTML=hhtml;
+    if(hprev) hf.value=hprev;
+  }
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  // ---- render: today ----
+  function renderToday(){
+    const tk=todayKey();
+    const todays=data.sets.filter(s=>dateKey(s.ts)===tk);
+    let vol=0; todays.forEach(s=>vol+=s.weight*s.reps);
+    document.getElementById("todaySets").textContent=todays.length;
+    document.getElementById("todayVol").innerHTML=fmtNum(vol)+'<span class="unit">kg</span>';
+
+    const wrap=document.getElementById("todayList");
+    if(!todays.length){
+      wrap.innerHTML=`<div class="empty"><div class="big">まだ記録がありません</div><p>上のフォームから今日の1セット目を記録しよう。</p></div>`;
+      return;
+    }
+    // group by exercise, preserve first-seen order (most recent exercise first)
+    const order=[]; const groups={};
+    todays.slice().reverse().forEach(s=>{
+      if(!groups[s.exId]){ groups[s.exId]=[]; order.push(s.exId); }
+      groups[s.exId].push(s);
+    });
+    let html="";
+    order.forEach(exId=>{
+      const sets=groups[exId].slice().reverse(); // chronological within exercise
+      let gvol=0; sets.forEach(s=>gvol+=s.weight*s.reps);
+      const bp=exBody(exId);
+      html+=`<div class="group"><div class="group-head"><div class="name">${escapeHtml(exName(exId))}${bp?`<span class="bodypart-pill">${bp}</span>`:""}</div><div class="vol num">${fmtNum(gvol)} kg</div></div>`;
+      sets.forEach((s,i)=>{ html+=setRow(s,i+1,true); });
+      html+=`</div>`;
+    });
+    wrap.innerHTML=html;
+  }
+
+  function setChip(s, withDelete){
+    const bestSet=best(s.exId);
+    const isPr = bestSet && bestSet.id===s.id && s.weight>0;
+    return `<span class="setchip${isPr?" pr":""}">${fmtNum(s.weight)}<i>×</i>${s.reps}${withDelete?`<button class="chip-x" data-del="${s.id}" aria-label="削除">✕</button>`:""}</span>`;
+  }
+
+  function setRow(s,idx,withDelete){
+    const bestSet=best(s.exId);
+    const isPr = bestSet && bestSet.id===s.id && s.weight>0;
+    return `<div class="set">
+      <div class="idx num">${idx}</div>
+      <div class="lift">${fmtNum(s.weight)}<span class="kg">kg</span><span class="x">×</span>${s.reps}</div>
+      ${isPr?'<span class="pr">自己ベスト</span>':''}
+      ${withDelete?`<button class="icon-btn" data-del="${s.id}" aria-label="削除">${TRASH}</button>`:''}
+    </div>`;
+  }
+
+  function fmtNum(n){ return Number.isInteger(n)?n:(Math.round(n*10)/10); }
+
+  // ---- render: history ----
+  function splitsForDay(exIds){
+    const set=new Set(exIds); const names=[];
+    data.splits.forEach(sp=>{ if(sp.exIds.some(id=>set.has(id))) names.push(sp.name); });
+    return names;
+  }
+  async function moveDay(oldKey,newKey){
+    if(!newKey || oldKey===newKey) return;
+    const moving=data.sets.filter(s=>dateKey(s.ts)===oldKey).sort((a,b)=>a.ts-b.ts);
+    const [y,m,d]=newKey.split("-").map(Number);
+    const base=Date.UTC(y,m-1,d,12,0,0);
+    moving.forEach((s,i)=>{ s.ts = base + i*60000; });
+    editHistDay=null;
+    await save();
+    renderHistory(); renderInsight(); renderToday(); renderSplits();
+    toast(moving.length+"セットを "+newKey+" に移しました");
+  }
+
+  function renderHistory(){
+    const filter=document.getElementById("histFilter").value || "__all";
+    let sets=data.sets.slice();
+    if(filter!=="__all") sets=sets.filter(s=>s.exId===filter);
+    const wrap=document.getElementById("historyList");
+    if(!sets.length){
+      wrap.innerHTML=`<div class="empty"><div class="big">記録なし</div><p>${filter==="__all"?"トレーニングを記録すると、ここに履歴が日付ごとに並びます。":"この種目の記録はまだありません。"}</p></div>`;
+      return;
+    }
+    // group by date desc
+    const byDate={}; const days=[];
+    sets.forEach(s=>{ const k=dateKey(s.ts); if(!byDate[k]){byDate[k]=[];days.push(k);} byDate[k].push(s); });
+    days.sort((a,b)=>b.localeCompare(a));
+    const totalDays=days.length;
+    const shown=days.slice(0, historyLimit);   // only render recent days
+    let html="";
+    shown.forEach(k=>{
+      const dSets=byDate[k];
+      let vol=0; dSets.forEach(s=>vol+=s.weight*s.reps);
+      const f=fmtDateFull(k);
+      const exOrder=[]; const g={};
+      dSets.forEach(s=>{ if(!g[s.exId]){g[s.exId]=[];exOrder.push(s.exId);} g[s.exId].push(s); });
+      const editing = editHistDay===k;
+      html+=`<div class="day-block${editing?" editing":""}"><div class="day-head">`
+        +`<span class="date num">${f.main}</span>`
+        +`<span style="color:var(--muted);font-size:13px">${f.sub}</span>`
+        +`<span class="meta">${dSets.length}セット ・ ${fmtNum(vol)}kg</span>`
+        +`<button class="day-edit${editing?" on":""}" data-histedit="${k}">${editing?"完了":"編集"}</button>`
+        +`</div>`;
+      if(editing){
+        html+=`<div class="day-edit-bar"><label for="d-${k}">日付を変更</label><input type="date" id="d-${k}" class="day-date" data-histdate="${k}" value="${k}"><span class="edit-hint">つけ忘れた日に移せます</span></div>`;
+      }
+      // group the day's exercises by the split that covers the most of them (dominant split)
+      let remaining=exOrder.slice(); const boxes=[];
+      while(remaining.length){
+        let bestSp=null, bestCover=0;
+        data.splits.forEach(sp=>{
+          const c=remaining.filter(id=>sp.exIds.includes(id)).length;
+          if(c>bestCover){ bestCover=c; bestSp=sp; }
+        });
+        if(!bestSp){ boxes.push({name:null, ids:remaining}); break; }
+        const ids=remaining.filter(id=>bestSp.exIds.includes(id));
+        boxes.push({name:bestSp.name, ids});
+        remaining=remaining.filter(id=>!bestSp.exIds.includes(id));
+      }
+
+      boxes.forEach(box=>{
+        const head = box.name ? escapeHtml(box.name) : "その他";
+        html+=`<div class="hist-split"><div class="hist-split-head${box.name?"":" other"}">${head}</div>`;
+        box.ids.forEach(exId=>{
+          const es=g[exId].sort((a,b)=>a.ts-b.ts);
+          let ev=0; es.forEach(s=>ev+=s.weight*s.reps);
+          html+=`<div class="hist-ex"><div class="hist-ex-name">${escapeHtml(exName(exId))}</div>`
+            +`<div class="setchips"><span class="exvol">${fmtNum(ev)}</span>${es.map(s=>setChip(s, editing || filter!=="__all")).join("")}</div></div>`;
+        });
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+    });
+    if(totalDays>shown.length){
+      html+=`<button class="load-more" data-loadmore="1">さらに読み込む（残り${totalDays-shown.length}日）</button>`;
+    }
+    wrap.innerHTML=html;
+  }
+
+  // ---- render: exercises ----
+  // ---- render: split chips (record tab) ----
+  function renderSplitChips(){
+    const wrap=document.getElementById("splitChips");
+    if(activeSplit!=="__all" && !data.splits.some(s=>s.id===activeSplit)) activeSplit="__all";
+    let html=`<button class="split-chip ${activeSplit==="__all"?"sel":""}" data-split="__all">すべて</button>`;
+    data.splits.forEach(s=>{
+      html+=`<button class="split-chip ${activeSplit===s.id?"sel":""}" data-split="${s.id}">${escapeHtml(s.name)}</button>`;
+    });
+    wrap.innerHTML=html;
+  }
+
+  function exRowHtml(e, splitId, idx, total, editing){
+    const b=best(e.id);
+    const cnt=data.sets.filter(s=>s.exId===e.id).length;
+    const meta = cnt ? `${cnt}セット ・ ベスト <span class="best">${fmtNum(b.weight)}×${b.reps}</span>` : "記録なし";
+    let order="", removeBtn="", editBtn="";
+    if(editing){
+      if(splitId){
+        order = `<div class="sp-order">
+          <button class="ord-btn" data-moveup="${e.id}" data-sp="${splitId}" ${idx===0?"disabled":""} aria-label="上へ">${CARET_UP}</button>
+          <button class="ord-btn" data-movedown="${e.id}" data-sp="${splitId}" ${idx===total-1?"disabled":""} aria-label="下へ">${CARET_DOWN}</button>
+        </div>`;
+        removeBtn = `<button class="icon-btn sm" data-unlink="${e.id}" data-sp="${splitId}" aria-label="この分割から外す">${MINUS}</button>`;
+      }
+      editBtn = `<button class="icon-btn sm" style="color:var(--muted)" data-editex="${e.id}" aria-label="名前を変更">${EDIT}</button>`;
+    }
+    return `<div class="sp-ex">
+      ${order}
+      <div class="sp-ex-body">
+        <div class="sp-ex-name">${escapeHtml(e.name)}${e.body?`<span class="bodypart-pill">${e.body}</span>`:""}</div>
+        <div class="sp-ex-meta">${meta}</div>
+      </div>
+      ${editBtn}
+      ${removeBtn}
+    </div>`;
+  }
+
+  function renderSplits(){
+    const wrap=document.getElementById("splitList");
+    if(!data.splits.length){
+      wrap.innerHTML=`<div class="empty"><div class="big">分割がありません</div><p>まず「プッシュ」「脚の日」などの分割を作り、その中に種目を追加していきます。</p></div>`;
+    } else {
+      let html="";
+      data.splits.forEach(s=>{
+        const editing = editModeSplit===s.id;
+        const exs=s.exIds.map(id=>data.exercises.find(e=>e.id===id)).filter(Boolean);
+        const rows = exs.length
+          ? exs.map((e,i)=>exRowHtml(e,s.id,i,exs.length,editing)).join("")
+          : `<div class="split-empty-note">${editing?"下の＋から種目を追加してください。":"まだ種目がありません。編集から追加できます。"}</div>`;
+
+        const headTools = editing
+          ? `<button class="icon-btn sm" style="color:var(--muted)" data-editsplit="${s.id}" aria-label="分割名を変更">${EDIT}</button>
+             <button class="icon-btn sm" data-delsplit="${s.id}" aria-label="分割を削除">${TRASH}</button>
+             <button class="edit-toggle done" data-editmode="">完了</button>`
+          : `<button class="edit-toggle" data-editmode="${s.id}">編集</button>`;
+
+        const addBtn = editing
+          ? `<button class="sp-add" data-addex="${s.id}">
+               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+               種目を追加
+             </button>`
+          : "";
+
+        html+=`<div class="split-item${editing?" editing":""}">
+          <div class="split-item-head">
+            <span class="sp-name">${escapeHtml(s.name)}</span>
+            <span class="sp-count">${exs.length}種目</span>
+            ${headTools}
+          </div>
+          ${rows}
+          ${addBtn}
+        </div>`;
+      });
+      wrap.innerHTML=html;
+    }
+    renderOrphans();
+  }
+
+  // exercises that belong to no split — surfaced so they never get lost
+  function renderOrphans(){
+    const box=document.getElementById("orphanBlock");
+    const used=new Set(); data.splits.forEach(s=>s.exIds.forEach(id=>used.add(id)));
+    const orph=data.exercises.filter(e=>!used.has(e.id));
+    if(!orph.length){ box.innerHTML=""; return; }
+    box.innerHTML=`<div class="eyebrow" style="margin-top:26px">どの分割にも入っていない種目</div>
+      <div class="split-item">${orph.map(e=>exRowHtml(e,null,0,0,true)).join("")}</div>`;
+  }
+
+  // ---- split editor modal (name only) ----
+  function openSplitModal(id){
+    editingSplitId=id||null;
+    const sp=id?data.splits.find(s=>s.id===id):null;
+    document.getElementById("splitModalTitle").textContent=id?"分割を編集":"分割を追加";
+    document.getElementById("splitName").value=sp?sp.name:"";
+    document.getElementById("splitModal").classList.add("open");
+    setTimeout(()=>document.getElementById("splitName").focus(),120);
+    validateSplitSave();
+  }
+  function closeSplitModal(){ document.getElementById("splitModal").classList.remove("open"); editingSplitId=null; }
+  function validateSplitSave(){
+    document.getElementById("splitSave").disabled = !document.getElementById("splitName").value.trim();
+  }
+
+  // ---- add-exercise-to-split sheet ----
+  let addExSplitId=null, addExSel=new Set(), newExBody="胸";
+  function openAddExSheet(splitId){
+    addExSplitId=splitId; addExSel=new Set(); newExBody="胸";
+    const sp=data.splits.find(s=>s.id===splitId);
+    document.getElementById("addExTitle").textContent=(sp?sp.name:"")+" に種目を追加";
+    document.getElementById("newExName").value="";
+    renderNewExBody(); renderAddExPick();
+    document.getElementById("addExSheet").classList.add("open");
+  }
+  function closeAddExSheet(){ document.getElementById("addExSheet").classList.remove("open"); addExSplitId=null; }
+  function renderNewExBody(){
+    document.getElementById("newExBody").innerHTML=BODYPARTS.map(b=>
+      `<button class="chip ${b===newExBody?'sel':''}" data-newbody="${b}">${b}</button>`).join("");
+  }
+  function renderAddExPick(){
+    const box=document.getElementById("addExPick");
+    const sp=data.splits.find(s=>s.id===addExSplitId);
+    const inSplit=new Set(sp?sp.exIds:[]);
+    const avail=data.exercises.filter(e=>!inSplit.has(e.id));
+    if(!avail.length){
+      box.innerHTML=`<div class="pick-empty">追加できる既存の種目はありません。<br>上の欄から新しく作ってください。</div>`;
+      return;
+    }
+    const byBody={};
+    avail.forEach(e=>{ (byBody[e.body||"その他"] ||= []).push(e); });
+    let html="";
+    BODYPARTS.forEach(b=>{
+      if(byBody[b]){
+        html+=`<div class="pick-group">${b}</div>`;
+        byBody[b].forEach(e=>{
+          const on=addExSel.has(e.id);
+          html+=`<div class="pick-item ${on?"on":""}" data-pick="${e.id}">
+            <div class="pick-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+            <div class="pick-name">${escapeHtml(e.name)}</div>
+          </div>`;
+        });
+      }
+    });
+    box.innerHTML=html;
+  }
+  async function addSelectedToSplit(){
+    if(!addExSel.size){ toast("種目を選んでください"); return; }
+    const sp=data.splits.find(s=>s.id===addExSplitId);
+    if(sp){ addExSel.forEach(id=>{ if(!sp.exIds.includes(id)) sp.exIds.push(id); }); }
+    await save(); renderAll(); closeAddExSheet();
+    toast(addExSel.size+"種目を追加しました");
+  }
+  async function createAndAddExercise(){
+    const inp=document.getElementById("newExName");
+    const name=inp.value.trim();
+    if(!name){ toast("種目名を入力してください"); return; }
+    if(data.exercises.some(e=>e.name===name)){ toast("同じ名前の種目があります"); return; }
+    const e={id:uid(),name,body:newExBody};
+    data.exercises.push(e);
+    const sp=data.splits.find(s=>s.id===addExSplitId);
+    if(sp && !sp.exIds.includes(e.id)) sp.exIds.push(e.id);
+    await save();
+    inp.value="";
+    renderAddExPick(); renderSplits(); renderSelects(); renderInsight();
+    toast(`「${name}」を追加しました`);
+  }
+  async function moveExercise(splitId, exId, dir){
+    const sp=data.splits.find(s=>s.id===splitId);
+    if(!sp) return;
+    const i=sp.exIds.indexOf(exId);
+    const j=i+dir;
+    if(i<0 || j<0 || j>=sp.exIds.length) return;
+    [sp.exIds[i], sp.exIds[j]] = [sp.exIds[j], sp.exIds[i]];
+    await save(); renderSplits(); renderSelects();
+  }
+
+  async function unlinkExercise(splitId, exId){
+    const sp=data.splits.find(s=>s.id===splitId);
+    if(!sp) return;
+    sp.exIds=sp.exIds.filter(id=>id!==exId);
+    await save(); renderAll();
+    toast("この分割から外しました（記録は残ります）");
+  }
+
+  async function saveSplit(){
+    const name=document.getElementById("splitName").value.trim();
+    if(!name) return;
+    if(editingSplitId){
+      const s=data.splits.find(x=>x.id===editingSplitId);
+      if(s) s.name=name;
+      toast("分割を更新しました");
+    }else{
+      data.splits.push({id:uid(),name,exIds:[]});
+      toast("分割を追加しました");
+    }
+    await save(); renderAll(); closeSplitModal();
+  }
+
+  async function delSplit(id){
+    const s=data.splits.find(x=>x.id===id);
+    if(!confirm(`分割「${s?s.name:""}」を削除しますか？\n（種目そのものや記録は削除されません）`)) return;
+    data.splits=data.splits.filter(x=>x.id!==id);
+    if(activeSplit===id) activeSplit="__all";
+    await save(); renderAll();
+  }
+
+  function renderAll(){ renderSplitChips(); renderSelects(); renderInsight(); renderToday(); if(document.getElementById("view-history").classList.contains("active")) renderHistory(); renderSplits(); }
+
+  // ---- actions ----
+  async function recordSet(){
+    const exId=document.getElementById("exSelect").value;
+    if(!exId){ toast("先に種目を追加してください"); return; }
+    const w=parseFloat(document.getElementById("inWeight").value);
+    const r=parseInt(document.getElementById("inReps").value,10);
+    if(isNaN(w)||w<0){ toast("重量を入力してください"); return; }
+    if(isNaN(r)||r<=0){ toast("回数を入力してください"); return; }
+    data.sets.push({id:uid(),exId,weight:w,reps:r,ts:Date.now()});
+    await save();
+    renderInsight(); renderToday(); renderHistory(); renderSplits();
+    toast("記録しました");
+  }
+
+  async function delSet(id){
+    data.sets=data.sets.filter(s=>s.id!==id);
+    await save(); renderInsight(); renderToday(); renderHistory(); renderSplits();
+  }
+
+  // ---- exercise modal ----
+  function openExModal(id){
+    editingExId=id||null;
+    const ex=id?data.exercises.find(e=>e.id===id):null;
+    document.getElementById("exModalTitle").textContent=id?"種目を編集":"種目を追加";
+    document.getElementById("exName").value=ex?ex.name:"";
+    selectedBody=ex?ex.body:"胸";
+    renderBodyChips();
+    document.getElementById("exDelete").style.display = id ? "block" : "none";
+    document.getElementById("exModal").classList.add("open");
+    setTimeout(()=>document.getElementById("exName").focus(),120);
+    validateExSave();
+  }
+  function closeExModal(){ document.getElementById("exModal").classList.remove("open"); editingExId=null; }
+  function renderBodyChips(){
+    document.getElementById("bodyChips").innerHTML=BODYPARTS.map(b=>
+      `<button class="chip ${b===selectedBody?'sel':''}" data-body="${b}">${b}</button>`).join("");
+  }
+  function validateExSave(){
+    document.getElementById("exSave").disabled = !document.getElementById("exName").value.trim();
+  }
+  async function saveEx(){
+    const name=document.getElementById("exName").value.trim();
+    if(!name) return;
+    if(editingExId){
+      const e=data.exercises.find(x=>x.id===editingExId);
+      if(e){ e.name=name; e.body=selectedBody; }
+      toast("種目を更新しました");
+    }else{
+      data.exercises.push({id:uid(),name,body:selectedBody});
+      toast("種目を追加しました");
+    }
+    await save(); renderAll(); closeExModal();
+  }
+  async function delEx(id){
+    const cnt=data.sets.filter(s=>s.exId===id).length;
+    const msg = cnt? `「${exName(id)}」を削除しますか？\n記録済みの${cnt}セットも一緒に削除されます。` : `「${exName(id)}」を削除しますか？`;
+    if(!confirm(msg)) return;
+    data.exercises=data.exercises.filter(e=>e.id!==id);
+    data.sets=data.sets.filter(s=>s.exId!==id);
+    data.splits.forEach(s=>{ s.exIds=s.exIds.filter(x=>x!==id); });
+    await save(); closeExModal(); renderAll();
+  }
+
+  // ---- steppers ----
+  function step(type,delta){
+    if(type==="w"){
+      const el=document.getElementById("inWeight");
+      let v=parseFloat(el.value)||0; v=Math.max(0,Math.round((v+delta)*10)/10); el.value=v;
+    }else{
+      const el=document.getElementById("inReps");
+      let v=parseInt(el.value,10)||0; v=Math.max(0,v+delta); el.value=v;
+    }
+  }
+
+  // ---- nav ----
+  function switchView(v){
+    document.querySelectorAll(".view").forEach(el=>el.classList.remove("active"));
+    document.getElementById("view-"+v).classList.add("active");
+    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.view===v));
+    if(v==="history"){ historyLimit=30; renderHistory(); }
+    if(v==="split") renderSplits();
+    window.scrollTo(0,0);
+  }
+
+  // ---- wire events ----
+  function wire(){
+    document.getElementById("recordBtn").addEventListener("click",recordSet);
+    document.querySelectorAll(".step-btn").forEach(b=>b.addEventListener("click",()=>step(b.dataset.t,parseFloat(b.dataset.d))));
+    document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchView(t.dataset.view)));
+    document.getElementById("histFilter").addEventListener("change",()=>{ historyLimit=30; renderHistory(); });
+    document.getElementById("historyList").addEventListener("change",e=>{
+      const inp=e.target.closest("[data-histdate]"); if(inp) moveDay(inp.dataset.histdate, inp.value);
+    });
+    document.getElementById("exSelect").addEventListener("change",renderInsight);
+    document.getElementById("splitChips").addEventListener("click",e=>{
+      const c=e.target.closest("[data-split]"); if(!c) return;
+      activeSplit=c.dataset.split;
+      renderSplitChips(); renderSelects(); renderInsight();
+    });
+
+    document.getElementById("exCancel").addEventListener("click",closeExModal);
+    document.getElementById("exSave").addEventListener("click",saveEx);
+    document.getElementById("exName").addEventListener("input",validateExSave);
+    document.getElementById("exModal").addEventListener("click",e=>{ if(e.target.id==="exModal") closeExModal(); });
+    document.getElementById("bodyChips").addEventListener("click",e=>{
+      const c=e.target.closest("[data-body]"); if(!c) return;
+      selectedBody=c.dataset.body; renderBodyChips();
+    });
+
+    document.getElementById("openAddSplit").addEventListener("click",()=>openSplitModal(null));
+    document.getElementById("splitCancel").addEventListener("click",closeSplitModal);
+    document.getElementById("splitSave").addEventListener("click",saveSplit);
+    document.getElementById("splitName").addEventListener("input",validateSplitSave);
+
+    document.getElementById("addExCancel").addEventListener("click",closeAddExSheet);
+    document.getElementById("addExSave").addEventListener("click",addSelectedToSplit);
+    document.getElementById("newExAdd").addEventListener("click",createAndAddExercise);
+    document.getElementById("newExName").addEventListener("keydown",e=>{ if(e.key==="Enter") createAndAddExercise(); });
+    document.getElementById("addExSheet").addEventListener("click",e=>{ if(e.target.id==="addExSheet") closeAddExSheet(); });
+    document.getElementById("newExBody").addEventListener("click",e=>{
+      const c=e.target.closest("[data-newbody]"); if(!c) return;
+      newExBody=c.dataset.newbody; renderNewExBody();
+    });
+    document.getElementById("addExPick").addEventListener("click",e=>{
+      const it=e.target.closest("[data-pick]"); if(!it) return;
+      const id=it.dataset.pick;
+      if(addExSel.has(id)) addExSel.delete(id); else addExSel.add(id);
+      it.classList.toggle("on");
+    });
+    document.getElementById("exDelete").addEventListener("click",()=>{ if(editingExId) delEx(editingExId); });
+    document.getElementById("splitModal").addEventListener("click",e=>{ if(e.target.id==="splitModal") closeSplitModal(); });
+
+    document.getElementById("userPillBtn").addEventListener("click",openUserSheet);
+    document.getElementById("userSheet").addEventListener("click",e=>{ if(e.target.id==="userSheet") closeUserSheet(); });
+    document.getElementById("userAddBtn").addEventListener("click",commitUser);
+    document.getElementById("userEditCancel").addEventListener("click",()=>{ editingUserId=null; resetUserAddBar(); });
+    document.getElementById("userNameInput").addEventListener("keydown",e=>{ if(e.key==="Enter") commitUser(); });
+    document.getElementById("userRecoverBtn").addEventListener("click",runRecovery);
+    document.getElementById("userForceBtn").addEventListener("click",forceImport);
+    document.getElementById("userDiagBtn").addEventListener("click",runDiagnostics);
+    document.getElementById("noSaveX").addEventListener("click",()=>document.getElementById("noSave").classList.remove("show"));
+
+    // event delegation for dynamic delete/edit buttons
+    document.body.addEventListener("click",e=>{
+      const del=e.target.closest("[data-del]"); if(del){ delSet(del.dataset.del); return; }
+      const delex=e.target.closest("[data-delex]"); if(delex){ delEx(delex.dataset.delex); return; }
+      const editex=e.target.closest("[data-editex]"); if(editex){ openExModal(editex.dataset.editex); return; }
+      const ap=e.target.closest("[data-apply]"); if(ap){ document.getElementById("inWeight").value=ap.dataset.w; document.getElementById("inReps").value=ap.dataset.r; toast("目安を入力しました"); return; }
+      const editsp=e.target.closest("[data-editsplit]"); if(editsp){ openSplitModal(editsp.dataset.editsplit); return; }
+      const delsp=e.target.closest("[data-delsplit]"); if(delsp){ delSplit(delsp.dataset.delsplit); return; }
+      const em=e.target.closest("[data-editmode]"); if(em){ editModeSplit = em.dataset.editmode || null; renderSplits(); return; }
+      const lm=e.target.closest("[data-loadmore]"); if(lm){ historyLimit+=30; renderHistory(); return; }
+      const he=e.target.closest("[data-histedit]"); if(he){ editHistDay = editHistDay===he.dataset.histedit ? null : he.dataset.histedit; renderHistory(); return; }
+      const addx=e.target.closest("[data-addex]"); if(addx){ openAddExSheet(addx.dataset.addex); return; }
+      const unl=e.target.closest("[data-unlink]"); if(unl){ unlinkExercise(unl.dataset.sp, unl.dataset.unlink); return; }
+      const mu=e.target.closest("[data-moveup]"); if(mu){ moveExercise(mu.dataset.sp, mu.dataset.moveup, -1); return; }
+      const md=e.target.closest("[data-movedown]"); if(md){ moveExercise(md.dataset.sp, md.dataset.movedown, 1); return; }
+      const up=e.target.closest("[data-userpick]"); if(up){ switchUser(up.dataset.userpick); return; }
+      const ue=e.target.closest("[data-useredit]"); if(ue){ startEditUser(ue.dataset.useredit); return; }
+      const ud=e.target.closest("[data-userdel]"); if(ud){ delUser(ud.dataset.userdel); return; }
+    });
+  }
+
+  // ---- init ----
+  // Last-resort guarantee: if we ended up with no records but a bundle is embedded, restore it.
+  async function ensureData(){
+    const b=window.SUGANO_BUNDLE;
+    if(!b || !b.data) return false;
+    if(data.sets.length > 0) return false;
+    // is there any other profile that has records? if so, don't override the user's choice
+    const orphans = await recoverUsers();
+    if(orphans.some(o=>o.sets>0)){
+      const best=orphans.slice().sort((x,y)=>y.sets-x.sets)[0];
+      meta.currentUserId=best.id;
+      if(!meta.users.some(u=>u.id===best.id)) meta.users.push({id:best.id,name:best.name||b.userName});
+      await saveMeta(); await loadUserData();
+      if(data.sets.length>0) return true;
+    }
+    const incoming=normalize(JSON.parse(JSON.stringify(b.data)));
+    incoming.__name=b.userName;
+    let u=meta.users.find(x=>x.name===b.userName);
+    if(!u){ u={id:uid(),name:b.userName}; meta.users.push(u); }
+    await sSet(uKey(u.id), JSON.stringify(incoming));
+    meta.currentUserId=u.id;
+    await saveMeta();
+    await loadUserData();
+    return true;
+  }
+
+  (async function init(){
+    renderHeader();
+    await probeBackend();
+    await loadMeta();
+    recovered += await reconcileUsers();   // re-attach any orphaned profiles
+    await maybeImport();
+    await loadUserData();
+    await ensureData();                    // never show an empty app when data exists
+    wire();
+    renderUserPill();
+    renderAll();
+    if(backend==="memory"){
+      document.getElementById("noSave").classList.add("show");
+    } else if(recovered){
+      toast(`保存されていた記録 ${recovered}セットを復元しました`);
+    }
+  })();
+})();
+</script>
+</body>
+</html>
