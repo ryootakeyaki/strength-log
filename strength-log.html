@@ -1354,6 +1354,11 @@
       // keep the order defined inside the split
       const filtered=sp?sp.exIds.map(id=>data.exercises.find(e=>e.id===id)).filter(Boolean):[];
       if(filtered.length) list=filtered;
+    } else {
+      // "すべて" でも、どの分割にも属さない種目は選択肢から隠す
+      const inAnySplit=new Set();
+      data.splits.forEach(s=>s.exIds.forEach(id=>inAnySplit.add(id)));
+      if(inAnySplit.size) list=data.exercises.filter(e=>inAnySplit.has(e.id));
     }
     const byBody={};
     list.forEach(e=>{ (byBody[e.body||"その他"] ||= []).push(e); });
